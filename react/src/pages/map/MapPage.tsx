@@ -1,4 +1,5 @@
 import * as L from 'leaflet'; // must be imported first
+import * as L1 from 'leaflet.markercluster';
 import './MapPage.scss';
 import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
@@ -32,6 +33,7 @@ import LanguageIcon from '@material-ui/icons/Language';
 import Terrain from '../terrain/TerrainPage';
 
 
+
 /**
   there are several forms of state in this page:
     a) the fetched pings/tracks state from the API 
@@ -56,6 +58,12 @@ export default function MapPage(): JSX.Element {
   const [pingsLayer] = useState<L.GeoJSON<L.Point>>(new L.GeoJSON()); // Store Pings
   const [latestPingsLayer] = useState<L.GeoJSON<L.Point>>(new L.GeoJSON());
   const [latestUPingsLayer] = useState<L.GeoJSON<L.Point>>(new L.GeoJSON());
+
+  // Marker cluster layer
+  const clusterLayer = L1.markerClusterGroup({
+    spiderfyOnMaxZoom: false,
+    zoomToBoundsOnClick: true
+  });
 
   // tracks layer state
   const [unassignedPingsLayer] = useState<L.GeoJSON<L.Point>>(new L.GeoJSON()); // Store Unassigned Pings
