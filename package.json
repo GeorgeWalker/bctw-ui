@@ -19,8 +19,5 @@
     "url": "https://github.com/bcgov/bctw-ui/issues"
   },
   "homepage": "https://github.com/bcgov/bctw-ui#readme",
-  "dependencies": {
-    "exports-loader": "^2.0.0",
-    "prunecluster": "^2.1.0"
-  }
+  "dependencies": {}
 }
