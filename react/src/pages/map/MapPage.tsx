@@ -31,6 +31,9 @@ import MapIcon from '@material-ui/icons/Map';
 import LanguageIcon from '@material-ui/icons/Language';
 import Terrain from '../terrain/TerrainPage';
 
+import { PruneCluster, PruneClusterForLeaflet } from 'exports-loader?PruneCluster,PruneClusterForLeaflet!prunecluster/dist/PruneCluster.js'
+
+
 /**
   there are several forms of state in this page:
     a) the fetched pings/tracks state from the API 
