@@ -4,6 +4,7 @@ import './MapPage.scss';
 import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet.markercluster/dist/MarkerCluster.css'
 
 import { CircularProgress } from '@material-ui/core';
 import pointsWithinPolygon from '@turf/points-within-polygon';
@@ -62,7 +63,8 @@ export default function MapPage(): JSX.Element {
   // Marker cluster layer
   const clusterLayer = L1.markerClusterGroup({
     spiderfyOnMaxZoom: false,
-    zoomToBoundsOnClick: true
+    zoomToBoundsOnClick: true,
+    disableClusteringAtZoom: 14
   });
 
   // tracks layer state
