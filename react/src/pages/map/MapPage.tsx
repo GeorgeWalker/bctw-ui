@@ -172,11 +172,14 @@ export default function MapPage(): JSX.Element {
           } else if (onlyLastKnown) {
             mapRef.current.removeLayer(pingsLayer);
             mapRef.current.removeLayer(tracksLayer);
+            // TODO JAMIE: Remove pingsLayer from cluster
           } 
         } else if (!filters.length) {
           const { latest, other } = splitPings(fetchedPings);
           pingsLayer.addData(other as any);
           latestPingsLayer.addData(latest as any);
+          // TODO JAMIE: Re-adding pingsLayer to cluster
+        
         }
       }
     }
