@@ -356,7 +356,6 @@ export default function MapPage(): JSX.Element {
   
   // clears existing pings/tracks layers
   const clearLayers = (): void => {
-    console.log('clearLayers');
     const layerPicker = L.control.layers();
     const allLayers = [...getAssignedLayers(), ...getUnassignedLayers()];
     allLayers.forEach(l => {
@@ -385,8 +384,6 @@ export default function MapPage(): JSX.Element {
     }
     // XXX: Test code
     // Forcing the cluster layer to redraw. **Not working**
-    console.log('redrawLayers');
-    console.log(clusterLayer);
     mapRef.current.eachLayer ((layer) => {
       if ((layer as any).options.class === 'cluster')  {
         mapRef.current.removeLayer(layer);
@@ -397,7 +394,6 @@ export default function MapPage(): JSX.Element {
 
   // redraw only pings, if no params supplied it will default the fetched ones
   const redrawPings = (newPings: ITelemetryPoint[]): void => {
-    console.log('redraw pings');
     const { latest, other } = splitPings(newPings);
     const layerPicker = L.control.layers();
     layerPicker.removeLayer(pingsLayer);
