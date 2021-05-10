@@ -602,17 +602,14 @@ export default function MapPage(): JSX.Element {
 
   // Add the ping layers
   useEffect(() => {
-    // pingsLayer.addTo(mapRef.current);
     clusterLayer.addTo(mapRef.current);
   }, [pingsLayer]);
 
   useEffect(() => {
-    // latestPingsLayer.addTo(mapRef.current);
     clusterLayer.addLayer(latestPingsLayer);
   }, [latestPingsLayer]);
 
   useEffect(() => {
-    // unassignedPingsLayer.addTo(mapRef.current);
     clusterLayer.addLayer(unassignedPingsLayer);
   }, [unassignedPingsLayer]);
 
