@@ -67,6 +67,7 @@ export default function MapPage(): JSX.Element {
 
   // Marker cluster layer
   const clusterLayer = new L1.MarkerClusterGroup({
+    class: 'cluster',
     spiderfyOnMaxZoom: false,
     zoomToBoundsOnClick: true,
     disableClusteringAtZoom: 11
@@ -279,15 +280,19 @@ export default function MapPage(): JSX.Element {
       return;
     }
     if (showUnassignedLayers) {
-      ref.addLayer(unassignedPingsLayer);
+      // ref.addLayer(unassignedPingsLayer);
       ref.addLayer(unassignedTracksLayer);
-      ref.addLayer(latestUPingsLayer);
+      // ref.addLayer(latestUPingsLayer);
+      clusterLayer.addLayer(unassignedPingsLayer);
+      clusterLayer.addLayer(latestUPingsLayer);
     } else {
       // fixme: why does this need a delay?
       setTimeout(() => {
-        ref.removeLayer(unassignedPingsLayer)
+        clusterLayer.removeLayer(unassignedPingsLayer);
+        clusterLayer.removeLayer(latestUPingsLayer);
+        // ref.removeLayer(unassignedPingsLayer)
         ref.removeLayer(unassignedTracksLayer);
-        ref.removeLayer(latestUPingsLayer);
+        // ref.removeLayer(latestUPingsLayer);
       }, 100) ;
     }
   }, [showUnassignedLayers])
@@ -351,6 +356,7 @@ export default function MapPage(): JSX.Element {
   
   // clears existing pings/tracks layers
   const clearLayers = (): void => {
+    console.log('clearLayers');
     const layerPicker = L.control.layers();
     const allLayers = [...getAssignedLayers(), ...getUnassignedLayers()];
     allLayers.forEach(l => {
@@ -377,10 +383,21 @@ export default function MapPage(): JSX.Element {
       unassignedPingsLayer.addData(other as any);
       latestUPingsLayer.addData(latest as any);
     }
+    // XXX: Test code
+    // Forcing the cluster layer to redraw. **Not working**
+    console.log('redrawLayers');
+    console.log(clusterLayer);
+    mapRef.current.eachLayer ((layer) => {
+      if ((layer as any).options.class === 'cluster')  {
+        mapRef.current.removeLayer(layer);
+        mapRef.current.addLayer(layer);
+      }
+    });
   };
 
   // redraw only pings, if no params supplied it will default the fetched ones
   const redrawPings = (newPings: ITelemetryPoint[]): void => {
+    console.log('redraw pings');
     const { latest, other } = splitPings(newPings);
     const layerPicker = L.control.layers();
     layerPicker.removeLayer(pingsLayer);
@@ -508,19 +525,21 @@ export default function MapPage(): JSX.Element {
   const handleShowLastKnownLocation = (show: boolean): void => {
     setOnlyLastKnown(show);
     if (show) {
-      mapRef.current.removeLayer(pingsLayer);
+      // mapRef.current.removeLayer(pingsLayer);
+      clusterLayer.removeLayer(pingsLayer);
       mapRef.current.removeLayer(tracksLayer);
-      mapRef.current.removeLayer(clusterLayer);
       if (showUnassignedLayers) {
-        mapRef.current.removeLayer(unassignedPingsLayer);
+        clusterLayer.removeLayer(unassignedPingsLayer);
+        // mapRef.current.removeLayer(unassignedPingsLayer);
         mapRef.current.removeLayer(unassignedTracksLayer);
       }
     } else {
       // mapRef.current.addLayer(pingsLayer);
       mapRef.current.addLayer(tracksLayer);
-      mapRef.current.addLayer(clusterLayer);
+      clusterLayer.addLayer(pingsLayer);
       if (showUnassignedLayers) {
-        mapRef.current.addLayer(unassignedPingsLayer);
+        clusterLayer.addLayer(unassignedPingsLayer);
+        // mapRef.current.addLayer(unassignedPingsLayer);
         mapRef.current.addLayer(unassignedTracksLayer);
       }
     }
@@ -572,16 +591,20 @@ export default function MapPage(): JSX.Element {
     // when all or no options are selected
     if (layers.length > 3) { // ie - we are showing/hiding all layers
       if (values.length === 2) { // show all was selected
-        layers.forEach(l => ref.addLayer(l));
+        // layers.forEach(l => ref.addLayer(l));
+        layers.forEach(l => clusterLayer.addLayer(l));
       } else if (values.length === 0) { // hide all was selected
-        layers.forEach(l => ref.removeLayer(l));
+        // layers.forEach(l => ref.removeLayer(l));
+        layers.forEach(l => clusterLayer.removeLayer(l));
       }
       return;
     }
     if (values.includes(MapStrings.assignmentStatusOptionA)) {
-      layers.forEach(l => ref.addLayer(l))
+      // layers.forEach(l => ref.addLayer(l))
+      layers.forEach(l => clusterLayer.addLayer(l));
     } else {
-      layers.forEach(l => ref.removeLayer(l))
+      // layers.forEach(l => ref.removeLayer(l))
+      layers.forEach(l => clusterLayer.removeLayer(l));
     }
   }
 
