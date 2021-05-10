@@ -607,11 +607,13 @@ export default function MapPage(): JSX.Element {
   }, [pingsLayer]);
 
   useEffect(() => {
-    latestPingsLayer.addTo(mapRef.current);
+    // latestPingsLayer.addTo(mapRef.current);
+    clusterLayer.addLayer(latestPingsLayer);
   }, [latestPingsLayer]);
 
   useEffect(() => {
-    unassignedPingsLayer.addTo(mapRef.current);
+    // unassignedPingsLayer.addTo(mapRef.current);
+    clusterLayer.addLayer(unassignedPingsLayer);
   }, [unassignedPingsLayer]);
 
   // trigger download on ctrl+s keyboard input
