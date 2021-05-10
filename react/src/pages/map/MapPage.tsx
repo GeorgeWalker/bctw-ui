@@ -4,7 +4,7 @@ import './MapPage.scss';
 import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet/dist/leaflet.css';
-import 'leaflet.markercluster/dist/MarkerCluster.css'
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 
 import { CircularProgress } from '@material-ui/core';
 import pointsWithinPolygon from '@turf/points-within-polygon';
@@ -25,7 +25,12 @@ import { formatDay, getToday } from 'utils/time';
 import { BCTWType } from 'types/common_types';
 import AddUDF from 'pages/udf/AddUDF';
 import useDidMountEffect from 'hooks/useDidMountEffect';
-import { setupLatestPingOptions, setupPingOptions, setupSelectedPings, setupTracksOptions, setupUnassignedPings } from 'pages/map/point_setup';
+import {
+  setupLatestPingOptions,
+  setupPingOptions,
+  setupSelectedPings,
+  setupTracksOptions,
+  setupUnassignedPings } from 'pages/map/point_setup';
 import { ISelectMultipleData } from 'components/form/MultiSelect';
 import { MapStrings } from 'constants/strings';
 
@@ -61,10 +66,10 @@ export default function MapPage(): JSX.Element {
   const [latestUPingsLayer] = useState<L.GeoJSON<L.Point>>(new L.GeoJSON());
 
   // Marker cluster layer
-  const clusterLayer = L1.markerClusterGroup({
+  const clusterLayer = new L1.MarkerClusterGroup({
     spiderfyOnMaxZoom: false,
     zoomToBoundsOnClick: true,
-    disableClusteringAtZoom: 14
+    disableClusteringAtZoom: 11
   });
 
   // tracks layer state
@@ -172,13 +177,12 @@ export default function MapPage(): JSX.Element {
           } else if (onlyLastKnown) {
             mapRef.current.removeLayer(pingsLayer);
             mapRef.current.removeLayer(tracksLayer);
-            // TODO JAMIE: Remove pingsLayer from cluster
+            mapRef.current.removeLayer(clusterLayer);
           } 
         } else if (!filters.length) {
           const { latest, other } = splitPings(fetchedPings);
           pingsLayer.addData(other as any);
           latestPingsLayer.addData(latest as any);
-          // TODO JAMIE: Re-adding pingsLayer to cluster
         
         }
       }
@@ -245,7 +249,16 @@ export default function MapPage(): JSX.Element {
   useEffect(() => {
     const updateComponent = (): void => {
       if (!mapRef.current) {
-        initMap(mapRef, drawnItems, selectedPingsLayer, tracksLayer, pingsLayer, handleDrawShape, handleBaseMapClick, handleWasDrawing);
+        initMap(
+          mapRef,
+          drawnItems,
+          selectedPingsLayer,
+          tracksLayer,
+          pingsLayer,
+          clusterLayer,
+          handleDrawShape,
+          handleBaseMapClick,
+          handleWasDrawing);
       }
       tracksLayer.bringToBack();
     };
@@ -497,13 +510,15 @@ export default function MapPage(): JSX.Element {
     if (show) {
       mapRef.current.removeLayer(pingsLayer);
       mapRef.current.removeLayer(tracksLayer);
+      mapRef.current.removeLayer(clusterLayer);
       if (showUnassignedLayers) {
         mapRef.current.removeLayer(unassignedPingsLayer);
         mapRef.current.removeLayer(unassignedTracksLayer);
       }
     } else {
       mapRef.current.addLayer(pingsLayer);
-      mapRef.current.addLayer(tracksLayer);
+      // mapRef.current.addLayer(tracksLayer);
+      mapRef.current.addLayer(clusterLayer);
       if (showUnassignedLayers) {
         mapRef.current.addLayer(unassignedPingsLayer);
         mapRef.current.addLayer(unassignedTracksLayer);
@@ -572,7 +587,13 @@ export default function MapPage(): JSX.Element {
 
   // Add the tracks layer
   useEffect(() => {
-    tracksLayer.addTo(mapRef.current)
+    // The tracks layer is only visible when zoomed in
+    const zoom = mapRef.current.getZoom();
+    if (zoom >= 11) {
+      mapRef.current.addLayer(tracksLayer);
+    } else {
+      mapRef.current.removeLayer(tracksLayer);
+    }
   }, [tracksLayer]);
 
   useEffect(() => {
@@ -583,6 +604,7 @@ export default function MapPage(): JSX.Element {
   // Add the ping layers
   useEffect(() => {
     pingsLayer.addTo(mapRef.current);
+    clusterLayer.addTo(mapRef.current);
   }, [pingsLayer]);
 
   useEffect(() => {

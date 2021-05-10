@@ -85,6 +85,7 @@ const initMap = (
   selectedPings: L.GeoJSON,
   tracks: L.GeoJSON,
   pings: L.GeoJSON,
+  clusterLayer: L.GeoJSON,
   drawSelectedLayer: () => void,
   handleMapClick: () => void,
   handleDrawFinished: () => void,
@@ -99,6 +100,17 @@ const initMap = (
 
   mapRef.current.addLayer(drawnItems);
   mapRef.current.addLayer(selectedPings);
+  clusterLayer.addLayer(pings);
+
+  // The tracks layer is only visible
+  mapRef.current.on('zoomend', () => {
+    const zoom = mapRef.current.getZoom();
+    if (zoom >= 11) {
+      mapRef.current.addLayer(tracks);
+    } else {
+      mapRef.current.removeLayer(tracks);
+    }
+  });
 
   const drawControl = new L.Control.Draw({
     position: 'topright',
