@@ -102,7 +102,7 @@ const initMap = (
   mapRef.current.addLayer(selectedPings);
   clusterLayer.addLayer(pings);
 
-  // The tracks layer is only visible
+  // The tracks layer is only visible when zoomed in
   mapRef.current.on('zoomend', () => {
     const zoom = mapRef.current.getZoom();
     if (zoom >= 11) {
