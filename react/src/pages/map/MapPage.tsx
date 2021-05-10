@@ -516,8 +516,8 @@ export default function MapPage(): JSX.Element {
         mapRef.current.removeLayer(unassignedTracksLayer);
       }
     } else {
-      mapRef.current.addLayer(pingsLayer);
-      // mapRef.current.addLayer(tracksLayer);
+      // mapRef.current.addLayer(pingsLayer);
+      mapRef.current.addLayer(tracksLayer);
       mapRef.current.addLayer(clusterLayer);
       if (showUnassignedLayers) {
         mapRef.current.addLayer(unassignedPingsLayer);
@@ -587,7 +587,6 @@ export default function MapPage(): JSX.Element {
 
   // Add the tracks layer
   useEffect(() => {
-    // The tracks layer is only visible when zoomed in
     const zoom = mapRef.current.getZoom();
     if (zoom >= 11) {
       mapRef.current.addLayer(tracksLayer);
@@ -603,7 +602,7 @@ export default function MapPage(): JSX.Element {
 
   // Add the ping layers
   useEffect(() => {
-    pingsLayer.addTo(mapRef.current);
+    // pingsLayer.addTo(mapRef.current);
     clusterLayer.addTo(mapRef.current);
   }, [pingsLayer]);
 

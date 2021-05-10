@@ -96,11 +96,12 @@ const initMap = (
   addTileLayers(mapRef, layerPicker);
 
   layerPicker.addOverlay(tracks, 'Animal Tracks');
-  layerPicker.addOverlay(pings, 'Animal Locations');
+  layerPicker.addOverlay(clusterLayer, 'Animal Locations');
 
   mapRef.current.addLayer(drawnItems);
-  mapRef.current.addLayer(selectedPings);
+
   clusterLayer.addLayer(pings);
+  clusterLayer.addLayer(selectedPings);
 
   // The tracks layer is only visible when zoomed in
   mapRef.current.on('zoomend', () => {
