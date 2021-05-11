@@ -382,7 +382,7 @@ export default function MapPage(): JSX.Element {
       unassignedPingsLayer.addData(other as any);
       latestUPingsLayer.addData(latest as any);
     }
-    // XXX: Test code
+    // XXX: Test code.
     // Forcing the cluster layer to redraw. **Not working**
     mapRef.current.eachLayer ((layer) => {
       if ((layer as any).options.class === 'cluster')  {
