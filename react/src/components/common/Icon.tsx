@@ -7,7 +7,7 @@ import Grain from '@material-ui/icons/Grain';
 import Terrain from '@material-ui/icons/Terrain'
 import Dashboard from '@material-ui/icons/Dashboard';
 import Pets from '@material-ui/icons/Pets'
-import GpsFixed from '@material-ui/icons/GpsFixed';
+import Devices from '@material-ui/icons/Devices';
 import BarChart from '@material-ui/icons/BarChart';
 import PersonIcon from '@material-ui/icons/Person';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
@@ -16,7 +16,9 @@ import CloseIcon from '@material-ui/icons/Close';
 import ErrorIcon from '@material-ui/icons/Error';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import EditIcon from '@material-ui/icons/Edit';
+import SnoozeIcon from '@material-ui/icons/Snooze';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import AlarmOffIcon from '@material-ui/icons/AlarmOff';
 
 const mappings: Record<string, JSX.Element> = {
   data: <Dashboard />,
@@ -26,7 +28,7 @@ const mappings: Record<string, JSX.Element> = {
   remove: <Remove />,
   plus: <Add />,
   critter: <Pets/>,
-  collar: <GpsFixed/>,
+  collar: <Devices/>,
   code: <BarChart/>,
   'arrow-up': <ArrowUpward />,
   'arrow-down': <ArrowDownward />,
@@ -38,6 +40,8 @@ const mappings: Record<string, JSX.Element> = {
   error: <ErrorIcon htmlColor='orange'/>,
   edit: <EditIcon />,
   copy: <FileCopyIcon />,
+  snooze: <SnoozeIcon />,
+  cannotSnooze: <AlarmOffIcon />
 };
 
 type IconProps = {

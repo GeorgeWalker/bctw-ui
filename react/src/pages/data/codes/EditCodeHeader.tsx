@@ -1,5 +1,5 @@
 import { CritterCollarModalProps } from 'components/component_interfaces';
-import { getInputTypesOfT, eInputType } from 'components/form/form_helpers';
+import { getInputTypesOfT } from 'components/form/form_helpers';
 import TextField from 'components/form/Input';
 import ChangeContext from 'contexts/InputChangeContext';
 import { CodeHeaderInput } from 'types/code';
@@ -7,6 +7,7 @@ import EditModal from 'pages/data/common/EditModal';
 import { useState } from 'react';
 import { CodeStrings as S } from 'constants/strings';
 import { removeProps } from 'utils/common';
+import { eInputType } from 'types/form_types';
 
 // todo: remove these
 type EditCodeModalProps = CritterCollarModalProps<CodeHeaderInput> & {
@@ -15,17 +16,16 @@ type EditCodeModalProps = CritterCollarModalProps<CodeHeaderInput> & {
 }
 
 export default function EditCodeHeader(props: EditCodeModalProps): JSX.Element {
-  const { isEdit, editing, editableProps, selectableProps } = props;
+  const { editing, editableProps, selectableProps } = props;
   const [errors, setErrors] = useState<Record<string, unknown>>({});
 
-  const inputTypes = getInputTypesOfT<CodeHeaderInput>(editing, editableProps, selectableProps);
+  const inputTypes = getInputTypesOfT<CodeHeaderInput>(editing, editableProps.map(e => ({prop: e})), selectableProps);
   return (
     <EditModal
       title={S.addHeaderTitle}
-      newT={new CodeHeaderInput()}
       onValidate={(): boolean => true}
+      showInFullScreen={false}
       onReset={close}
-      isEdit={isEdit}
       {...props}>
       <ChangeContext.Consumer>
         {(handlerFromContext): React.ReactNode => {
@@ -48,7 +48,7 @@ export default function EditCodeHeader(props: EditCodeModalProps): JSX.Element {
                       <TextField
                         key={d.key}
                         propName={d.key}
-                        defaultValue={d.value}
+                        defaultValue={d.value as string}
                         type={d.type}
                         label={new CodeHeaderInput().formatPropAsHeader(d.key)}
                         disabled={false}

@@ -6,18 +6,13 @@ import {
   Math,
   Ion,
   GeoJsonDataSource,
-  CzmlDataSource,
-  Color
-} from 'cesium';
-import './TerrainPage.css';
+  CzmlDataSource} from 'cesium';
+import './TerrainPage.scss';
 import { useTelemetryApi } from 'hooks/useTelemetryApi';
 import { MapRange } from 'types/map';
 import dayjs from 'dayjs';
 import { formatDay, getToday } from 'utils/time';
 import { convert } from 'geojson2czml';
-import { map } from 'leaflet';
-
-
 
 const TerrainPage: React.FC = () => {
   const mapRef = useRef(null);
@@ -49,32 +44,6 @@ const TerrainPage: React.FC = () => {
         roll: 0.0
       }
     });
-
-    // const prod = +(location.port) === 1111 ? false : true;
-    // const h1 = location.protocol
-    // const h2 = location.hostname
-    // const h3 = prod ? location.port : 3000
-    // const h4 = prod ? '/api' : ''
-    // const urlTracks = `${h1}//${h2}:${h3}${h4}/get-critter-tracks?start=2020-12-31&end=2021-02-15`;
-    // const urlPings = `${h1}//${h2}:${h3}${h4}/get-critters?start=2020-12-31&end=2021-02-15`;
-
-    // fetch(urlPings)
-    //   .then(res => res.json())
-    //   .then(geojson => {
-    //     const layer = new GeoJsonDataSource('pings')
-    //       .load(geojson,{clampToGround: true});
-    //     mapRef.current.dataSources.add(layer);
-    //   })
-    //   .catch(error=>{console.error('Collar request failed',error)});
-
-    // fetch(urlTracks)
-    //   .then(res => res.json())
-    //   .then(geojson => {
-    //     const layer = new GeoJsonDataSource('pings')
-    //       .load(geojson,{clampToGround: true});
-    //     mapRef.current.dataSources.add(layer);
-    //   })
-    //   .catch(error=>{console.error('Track request failed',error)});
   };
 
   const bctwApi = useTelemetryApi();
@@ -186,9 +155,9 @@ const TerrainPage: React.FC = () => {
     loadSlider(pingsData);
   }, [pingsData,mapRef.current]);
 
-  useEffect(() => {
-    loadTracks(tracksData);
-  }, [tracksData,mapRef.current])
+  // useEffect(() => {
+  //   loadTracks(tracksData);
+  // }, [tracksData,mapRef.current])
 
   useEffect(() => {
     initMap();

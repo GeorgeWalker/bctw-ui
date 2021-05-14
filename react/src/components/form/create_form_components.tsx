@@ -1,89 +1,126 @@
-import { eInputType, FormInputType } from 'components/form/form_helpers';
 import TextField from 'components/form/Input';
-import { BCTW } from 'types/common_types';
+import NumberField from 'components/form/NumberInput';
 import SelectCode from './SelectCode';
+import DateInput from 'components/form/Date';
+import CheckBox from 'components/form/Checkbox';
+import React from 'react';
+import { columnToHeader } from 'utils/common';
+import { eInputType, FormInputType } from 'types/form_types';
 
-/**
- * @param iType
- * @param changeHandler
- * @param hasError
- * @param editing
- * @param canEdit
- * @param required
- * @param errText
- * @returns
- */
-function CreateEditTextField<T extends BCTW>(
-  iType: FormInputType,
-  changeHandler: (v: Record<string, unknown>) => void,
-  hasError: boolean,
-  editing: T,
-  canEdit: boolean,
-  required: boolean,
-  errText: string
-): JSX.Element {
-  return (
+type CreateInputBaseProps = {
+  formType: FormInputType;
+  handleChange: (v: Record<string, unknown>) => void;
+};
+
+type CreateInputProps = CreateInputBaseProps & {
+  label?: string;
+  disabled?: boolean;
+  errorMessage?: string;
+  required?: boolean;
+  span?: boolean;
+};
+
+function CreateEditTextField(props: CreateInputProps): JSX.Element {
+  const { key, value, type } = props.formType;
+  return typeof value === 'number' ? (
+    <NumberField
+      propName={key}
+      key={key}
+      defaultValue={value as number}
+      changeHandler={props.handleChange}
+      {...props}
+    />
+  ) : (
     <TextField
       outline={true}
-      key={iType.key}
-      propName={iType.key}
-      defaultValue={iType.value}
-      type={iType.type}
-      label={editing.formatPropAsHeader(iType.key)}
-      disabled={!canEdit}
-      changeHandler={changeHandler}
-      required={required}
-      error={hasError}
-      helperText={errText}
+      key={key}
+      propName={key}
+      defaultValue={value as string}
+      type={type}
+      {...props}
+      changeHandler={props.handleChange}
+      error={!!props.errorMessage ?? false}
+      helperText={props.errorMessage}
     />
   );
 }
 
-function CreateEditSelectField<T extends BCTW>(
-  iType: FormInputType,
-  changeHandler: (v: Record<string, unknown>) => void,
-  hasError: boolean,
-  editing: T,
-  canEdit: boolean,
-  required: boolean
-): JSX.Element {
+function CreateEditDateField({ formType, handleChange, label, disabled }: CreateInputProps): JSX.Element {
+  return (
+    <DateInput
+      propName={formType.key}
+      label={label}
+      defaultValue={formType.value as Date}
+      changeHandler={handleChange}
+      disabled={disabled}
+    />
+  );
+}
+
+function CreateEditCheckboxField({ formType, handleChange, label, disabled }: CreateInputProps): JSX.Element {
+  return (
+    <CheckBox
+      changeHandler={handleChange}
+      initialValue={formType.value as boolean}
+      label={label}
+      propName={formType.key}
+      disabled={disabled}
+    />
+  );
+}
+
+function CreateEditSelectField({
+  formType,
+  handleChange,
+  disabled,
+  required,
+  errorMessage,
+  label
+}: CreateInputProps): JSX.Element {
   return (
     <SelectCode
-      label={editing.formatPropAsHeader(iType.key)}
-      disabled={!canEdit}
-      key={iType.key}
-      codeHeader={iType.key}
-      defaultValue={iType.value as string}
-      changeHandler={changeHandler}
+      style={{ width: '200px', marginRight: '10px' }}
+      label={label}
+      disabled={disabled}
+      key={formType.key}
+      codeHeader={formType.key}
+      defaultValue={formType.value as string}
+      changeHandler={handleChange}
       required={required}
-      error={hasError}
+      error={!!errorMessage?.length}
+      className={'select-control-small'}
     />
   );
 }
 
-function MakeEditFields<T extends BCTW>(
-  iType: FormInputType,
-  changeHandler: (v: Record<string, unknown>) => void,
-  hasError: boolean,
-  editing: T,
-  canEdit: boolean,
-  required: boolean,
-  errText: string,
-  span?: boolean
-): React.ReactNode {
-  let Comp;
-  if (iType.type === eInputType.select) {
-    Comp = CreateEditSelectField(iType, changeHandler, hasError, editing, canEdit, required);
-  } else if (iType.type === eInputType.text || iType.type === eInputType.number) {
-    Comp = CreateEditTextField(iType, changeHandler, hasError, editing, canEdit, required, errText);
+function MakeEditField({
+  formType,
+  handleChange,
+  label,
+  disabled = false,
+  errorMessage = '',
+  required = false,
+  span = false
+}: CreateInputProps): React.ReactNode {
+  const inputType = formType.type;
+  const lbl = label ?? columnToHeader(formType.key);
+  let Comp: React.ReactNode;
+  if (inputType === eInputType.check) {
+    Comp = CreateEditCheckboxField({ formType, handleChange, disabled, label: lbl });
+  } else if (inputType === eInputType.date) {
+    Comp = CreateEditDateField({ formType, handleChange, disabled, label: lbl });
+  } else if (inputType === eInputType.select) {
+    Comp = CreateEditSelectField({ formType, handleChange, disabled, required, errorMessage, label: lbl });
+  } else if (inputType === eInputType.text || inputType === eInputType.number) {
+    Comp = CreateEditTextField({ formType, handleChange, errorMessage, disabled, required, label: lbl });
   }
   return span ? (
     <span className={'edit-form-field-span'}>{Comp}</span>
   ) : (
-    <div key={iType.key} className={'edit-form-field'}>
+    <div key={formType.key} className={'edit-form-field'}>
       {Comp}
     </div>
   );
 }
 
-export { CreateEditTextField, CreateEditSelectField, MakeEditFields };
+export { CreateEditTextField, CreateEditDateField, CreateEditCheckboxField, CreateEditSelectField, MakeEditField };

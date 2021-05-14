@@ -6,7 +6,9 @@ import { formatLocal } from 'utils/time';
 import { MAP_COLOURS } from 'pages/map/map_helpers';
 import React, { MutableRefObject } from 'react';
 import { MapTileLayers } from 'constants/strings';
-import { ITelemetryPoint } from 'types/map';
+import { ITelemetryPoint, TelemetryDetail } from 'types/map';
+import { plainToClass } from 'class-transformer';
+import { MapStrings } from 'constants/strings';
 
 const hidePopup = (): void => {
   const doc = document.getElementById('popup');
@@ -16,22 +18,20 @@ const hidePopup = (): void => {
 
 const setPopupInnerHTML = (feature: ITelemetryPoint): void => {
   const doc = document.getElementById('popup');
-  const p = feature.properties;
-  const g = feature.geometry;
-  const x = `${g.coordinates[0]?.toFixed(5)}\xb0`;
-  const y = `${g.coordinates[1]?.toFixed(5)}\xb0`;
+  const p = plainToClass(TelemetryDetail, feature.properties);
   const t = dayjs(p.date_recorded).format(formatLocal);
   const text = `
-    ${p.species ? 'Species: ' + p.species : ''} ${p.animal_id ? 'ID: ' + p.animal_id + '<br>' : ''} 
-    ${p.wlh_id ? 'WLHID: ' + p.wlh_id + '<br>' : ''}
-    Device ID: ${p.device_id} (${p.device_vendor}) <br>
-    ${p.frequency ? 'Frequency: ' + p.frequency + '<br>' : ''}
+    ${p.species ? 'Species: ' + p.species + '<br>' : ''}
+    ${p.wlh_id ? 'WLH ID: ' + p.wlh_id + '<br>' : ''}
+    ${p.animal_id ? 'Animal ID: ' + p.animal_id + '<br>' : ''}
+    Device ID: ${p.formattedDevice}<br>
+    Frequency (MHz): ${p.paddedFrequency}<br>
     ${p.animal_status ? 'Animal Status: ' + '<b>' + p.animal_status + '</b><br>' : ''}
     ${p.animal_status === 'Mortality' ? 'Mortality Date: ' + p.mortality_date + '<br>' : ''}
+    ${p.sex ? 'Sex: ' + p.sex + '<br>' : ''}
     ${p.device_status ? 'Device Status: ' + '<b>' + p.device_status + '</b><br>' : ''}
-    ${p.population_unit ? 'Population Unit: ' + p.population_unit + '<br>' : ''}
-    ${t} <br>
-    Location: ${x}, ${y}
+    Time: ${dayjs(t).format('MMMM D, YYYY h:mm A')} UTC<br>
+    ${p.collective_unit ? 'Location: ' + '<b>' + p.collective_unit + '</b><br' : ''}
   `;
   doc.innerHTML = text;
   doc.classList.add('appear-above-map');
@@ -75,27 +75,29 @@ const addTileLayers = (mapRef: React.MutableRefObject<L.Map>, layerPicker: L.Con
   layerPicker.addBaseLayer(bcGovBaseLayer, 'BC Government');
 
   // Some BCGW Overlays
-  layerPicker.addOverlay(getUWR(), 'Ungulate Winter Ranges');
-  layerPicker.addOverlay(getCHL(), 'Cariboo Herd Locations');
+  layerPicker.addOverlay(getUWR(), 'Ungulate Winter Range');
+  layerPicker.addOverlay(getCHL(), 'Cariboo Herd Boundaries');
 };
 
 const initMap = (
   mapRef: MutableRefObject<L.Map>,
   drawnItems: L.FeatureGroup,
   selectedPings: L.GeoJSON,
-  tracks: L.GeoJSON,
+  // tracks: L.GeoJSON,
   pings: L.GeoJSON,
   clusterLayer: L.GeoJSON,
   drawSelectedLayer: () => void,
-  handleMapClick: () => void,
-  handleDrawFinished: () => void,
+  handleDrawLine: (l) => void,
+  handleDeleteLine: () => void,
 ): void => {
   mapRef.current = L.map('map', { zoomControl: true }).setView([55, -128], 6);
-  // const layerPicker = L.control.layers();
   const layerPicker = L.control.layers(null ,null,{position: 'topleft'});
+  L.drawLocal.draw.toolbar.buttons.polyline = MapStrings.drawLineLabel;
+  L.drawLocal.draw.toolbar.buttons.polygon = MapStrings.drawPolygonLabel;
+  L.drawLocal.draw.toolbar.buttons.rectangle = MapStrings.drawRectangleLabel;
   addTileLayers(mapRef, layerPicker);
 
-  layerPicker.addOverlay(tracks, 'Animal Tracks');
+  // layerPicker.addOverlay(tracks, 'Animal Tracks');
   layerPicker.addOverlay(clusterLayer, 'Animal Locations');
 
   mapRef.current.addLayer(drawnItems);
@@ -104,14 +106,14 @@ const initMap = (
   clusterLayer.addLayer(selectedPings);
 
   // The tracks layer is only visible when zoomed in
-  mapRef.current.on('zoomend', () => {
-    const zoom = mapRef.current.getZoom();
-    if (zoom >= 11) {
-      mapRef.current.addLayer(tracks);
-    } else {
-      mapRef.current.removeLayer(tracks);
-    }
-  });
+  // mapRef.current.on('zoomend', () => {
+  //   const zoom = mapRef.current.getZoom();
+  //   if (zoom >= 11) {
+  //     mapRef.current.addLayer(tracks);
+  //   } else {
+  //     mapRef.current.removeLayer(tracks);
+  //   }
+  // });
 
   const drawControl = new L.Control.Draw({
     position: 'topright',
@@ -129,7 +131,7 @@ const initMap = (
   mapRef.current.addControl(layerPicker);
 
   // line drawing control
-  const drawLabel = (e): void => {
+  const drawLabel = (e): L.Layer => {
     // Get the feature
     const lineString = e.layer.toGeoJSON();
     const distance = Math.round(length(lineString) * 10) / 10; // kms
@@ -147,7 +149,7 @@ const initMap = (
       }
     };
 
-    new LabeledMarker(feature.geometry.coordinates.slice().reverse(), feature, {
+    const marker = new LabeledMarker(feature.geometry.coordinates.slice().reverse(), feature, {
       markerOpions: {
         color: MAP_COLOURS['track'],
         textStyle: {
@@ -155,14 +157,20 @@ const initMap = (
           fontSize: 3
         }
       }
-    }).addTo(mapRef.current);
+    });
+    marker.addTo(mapRef.current);
+    return marker;
   };
 
   // Set up the drawing events
   mapRef.current
     .on('draw:created', (e) => {
       drawnItems.addLayer((e as any).layer);
-      if ((e as any).layerType === 'polyline') return drawLabel(e);
+      if ((e as any).layerType === 'polyline') {
+        const line = drawLabel(e);
+        handleDrawLine(line);
+        return line;
+      }
       drawSelectedLayer();
     })
     .on('draw:edited', (e) => {
@@ -170,13 +178,8 @@ const initMap = (
     })
     .on('draw:deletestop', (e) => {
       drawSelectedLayer();
+      handleDeleteLine();
     })
-    .on('click', (e) => {
-      // this is fired before other handlers are called,
-      // so if the user did not click a layer point, it will hide the popup
-      handleMapClick();
-    })
-    .on(L.Draw.Event.DRAWSTOP, handleDrawFinished);
 };
 
 export { initMap, hidePopup, setPopupInnerHTML, addTileLayers };

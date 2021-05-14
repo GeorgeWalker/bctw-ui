@@ -1,77 +1,113 @@
-import { Paper, Typography } from '@material-ui/core';
+import { Paper } from '@material-ui/core';
 import { CritterCollarModalProps } from 'components/component_interfaces';
-import { MakeEditFields } from 'components/form/create_form_components';
-import { getInputTypesOfT, validateRequiredFields, FormInputType } from 'components/form/form_helpers';
+import Button from 'components/form/Button';
+import { MakeEditField } from 'components/form/create_form_components';
+import { getInputTypesOfT, validateRequiredFields } from 'components/form/form_helpers';
+import Modal from 'components/modal/Modal';
 import { CritterStrings as CS } from 'constants/strings';
 import ChangeContext from 'contexts/InputChangeContext';
 import AssignmentHistory from 'pages/data/animals/AssignmentHistory';
+import CaptureWorkflow from 'pages/data/animals/CaptureWorkflow';
+import ReleaseWorkflow from 'pages/data/animals/ReleaseWorkflow';
+import MortalityEventForm from 'pages/data/events/MortalityEventForm';
 import EditModal from 'pages/data/common/EditModal';
-import { useEffect, useState } from 'react';
-import { Animal } from 'types/animal';
+import React, { useEffect, useState } from 'react';
+import { Animal, critterFormFields } from 'types/animal';
 import { eCritterPermission } from 'types/user';
 import { removeProps } from 'utils/common';
-
-// fixme: title pushed to top
+import { TelemetryAlert } from 'types/alert';
+import { FormInputType } from 'types/form_types';
 
 export default function EditCritter(props: CritterCollarModalProps<Animal>): JSX.Element {
-  const { isEdit, editing } = props;
+  const { isCreatingNew, editing } = props;
 
-  const canEdit = !isEdit ? true : editing.permission_type === eCritterPermission.change;
+  // for new critters, permission will be undefined
+  const canEdit = editing.permission_type === eCritterPermission.change || editing.permission_type === undefined;
   const requiredFields = CS.requiredProps;
 
   const [errors, setErrors] = useState<Record<string, unknown>>({});
   const [inputTypes, setInputTypes] = useState<FormInputType[]>([]);
+  const [showAssignmentHistory, setShowAssignmentHistory] = useState<boolean>(false);
+  const [showCaptureWorkflow, setShowCaptureWorkflow] = useState<boolean>(false);
+  const [showReleaseWorkflow, setShowReleaseWorkflow] = useState<boolean>(false);
+  const [showMortalityWorkflow, setShowMortalityWorkflow] = useState<boolean>(false);
 
   useEffect(() => {
-    setInputTypes(
-      getInputTypesOfT<Animal>(
+    const updateFields = (): void => {
+      const inputTypes = getInputTypesOfT<Animal>(
         editing,
-        allFields.map((a) => a.prop),
+        allFields,
         allFields.filter((f) => f.isCode).map((a) => a.prop)
-      )
-    );
+      );
+      setInputTypes(inputTypes);
+    };
+    updateFields();
   }, [editing]);
 
   const validateForm = (o: Animal): boolean => {
     const errors = validateRequiredFields(o, requiredFields);
     setErrors(errors);
-    return Object.keys(errors).length === 0;
+    const hasErrors = Object.keys(errors).length !== 0;
+    if (hasErrors && props.validateFailed) {
+      props.validateFailed(errors);
+    }
+    return !hasErrors;
   };
 
+  // fixme:
+  const alert = new TelemetryAlert();
+  {
+    alert.critter_id = editing.critter_id;
+    alert.collar_id = '12345';
+    alert.device_id = editing.device_id;
+    alert.wlh_id = editing.wlh_id;
+    alert.valid_from = editing.valid_from; // Does this make sense?
+  }
+
   const createTitle = (): string =>
-    !isEdit ? 'Add a new animal' : `${canEdit ? 'Editing' : 'Viewing'} ${editing.name}`;
+    !isCreatingNew ? 'Add a new animal' : `${canEdit ? 'Editing' : 'Viewing'} ${editing.name}`;
 
-  const generalFields = [
-    { prop: 'animal_status', isCode: true },
-    { prop: 'species', isCode: true },
-    { prop: 'life_stage', isCode: true },
-    { prop: 'estimated_age' },
-    { prop: 'sex', isCode: true },
-    { prop: 'juvenile_at_heel', isCode: true }
-  ];
-  const identifierFields = [
-    { prop: 'wlh_id' },
-    { prop: 'animal_id' },
-    { prop: 'ear_tag_left' },
-    { prop: 'ear_tag_right' },
-    { prop: 'population_unit', isCode: true }
-  ];
-  const locationFields = [{ prop: 'region', isCode: true }, { prop: 'location' }];
-  const allFields = [...locationFields, ...identifierFields, ...generalFields];
+  const {
+    associatedAnimalFields,
+    captureFields,
+    characteristicsFields,
+    identifierFields,
+    mortalityFields,
+    releaseFields,
+    userCommentField
+  } = critterFormFields;
 
-  const makeField = (
-    iType: FormInputType,
-    changeHandler: (v: Record<string, unknown>) => void,
-    hasError: boolean,
-    span?: boolean
+  const allFields = [
+    ...associatedAnimalFields,
+    ...captureFields,
+    ...characteristicsFields,
+    ...identifierFields,
+    ...mortalityFields,
+    ...releaseFields,
+    ...userCommentField
+  ];
+
+  const makeFormField = (
+    formType: FormInputType,
+    handleChange: (v: Record<string, unknown>) => void
   ): React.ReactNode => {
-    const isRequired = requiredFields.includes(iType.key);
-    const errorText = hasError && (errors[iType.key] as string);
-    return MakeEditFields(iType, changeHandler, hasError, editing, canEdit, isRequired, errorText, span);
+    const { key } = formType;
+    return MakeEditField({
+      formType,
+      handleChange,
+      disabled: !canEdit,
+      required: requiredFields.includes(key),
+      label: editing.formatPropAsHeader(key),
+      /* does the errors object have a property matching this key?
+        if so, get its error
+      */
+      errorMessage: !!errors[key] && (errors[key] as string),
+      span: true
+    });
   };
 
   return (
-    <EditModal title={createTitle()} newT={new Animal()} onValidate={validateForm} isEdit={isEdit} {...props}>
+    <EditModal hideSave={!canEdit} title={createTitle()} onValidate={validateForm} {...props}>
       <ChangeContext.Consumer>
         {(handlerFromContext): JSX.Element => {
           // override the modal's onChange function
@@ -82,36 +118,112 @@ export default function EditCritter(props: CritterCollarModalProps<Animal>): JSX
             handlerFromContext(v, modifyCanSave);
           };
           return (
-            <>
-              <form className='rootEditInput' autoComplete='off'>
-                <Paper className={'paper-edit'} elevation={3}>
-                  <Typography className={'edit-form-header'} variant='h5'>
-                    General Information
-                  </Typography>
-                  {inputTypes
-                    .filter((f) => generalFields.map((x) => x.prop).includes(f.key))
-                    .map((d) => makeField(d, onChange, !!errors[d.key]))}
+            <form className='rootEditInput' autoComplete='off'>
+              <Paper className={'dlg-full-title'} elevation={3}>
+                <h1>
+                  WLH ID: {editing?.wlh_id ?? '-'} &nbsp;<span style={{ fontWeight: 100 }}>/</span>&nbsp; Animal ID:{' '}
+                  {editing?.animal_id ?? '-'}
+                </h1>
+                <div className={'dlg-full-sub'}>
+                  <span className='span'>Species: {editing.species}</span>
+                  <span className='span'>|</span>
+                  <span className='span'>Device: {editing.device_id ?? 'Unassigned'}</span>
+                  <span className='button_span'>
+                    {!isCreatingNew ? (
+                      <Button className='button' onClick={(): void => setShowAssignmentHistory((o) => !o)}>
+                        Assign Device to Animal
+                      </Button>
+                    ) : null}
+                    {!isCreatingNew ? (
+                      <Button className='button' onClick={(): void => setShowCaptureWorkflow((o) => !o)}>
+                        Capture Event
+                      </Button>
+                    ) : null}
+                    {!isCreatingNew ? (
+                      <Button className='button' onClick={(): void => setShowReleaseWorkflow((o) => !o)}>
+                        Release Event
+                      </Button>
+                    ) : null}
+                    {!isCreatingNew ? (
+                      <Button className='button' onClick={(): void => setShowMortalityWorkflow((o) => !o)}>
+                        Mortality Event
+                      </Button>
+                    ) : null}
+                  </span>
+                </div>
+              </Paper>
+              <Paper elevation={0}>
+                <h2>Animal Details</h2>
+                <Paper elevation={3} className={'dlg-full-body-details'}>
+                  <div className={'dlg-details-section'}>
+                    <h3>Identifiers</h3>
+                    {inputTypes
+                      .filter((f) => identifierFields.map((x) => x.prop).includes(f.key))
+                      .map((f) => makeFormField(f, onChange))}
+                  </div>
+                  <div className={'dlg-details-section'}>
+                    <h3>Characteristics</h3>
+                    {inputTypes
+                      .filter((f) => characteristicsFields.map((x) => x.prop).includes(f.key))
+                      .map((formType) => makeFormField(formType, onChange))}
+                  </div>
+                  <div className={'dlg-details-section'}>
+                    <h3>Association With Another Individual</h3>
+                    {inputTypes
+                      .filter((f) => associatedAnimalFields.map((x) => x.prop).includes(f.key))
+                      .map((f) => makeFormField(f, onChange))}
+                  </div>
+                  <div className={'dlg-details-section'}>
+                    <h3>Comments About This Animal</h3>
+                    {inputTypes
+                      .filter((f) => userCommentField.map((x) => x.prop).includes(f.key))
+                      .map((f) => makeFormField(f, onChange))}
+                  </div>
+                  <div className={'dlg-details-section'}>
+                    <h3>Latest Capture Details</h3>
+                    {inputTypes
+                      .filter((f) => captureFields.map((x) => x.prop).includes(f.key))
+                      .map((f) => makeFormField(f, onChange))}
+                  </div>
+                  <div className={'dlg-details-section'}>
+                    <h3>Latest Release Details</h3>
+                    {inputTypes
+                      .filter((f) => releaseFields.map((x) => x.prop).includes(f.key))
+                      .map((f) => makeFormField(f, onChange))}
+                  </div>
+                  <div className={'dlg-details-section'}>
+                    <h3>Mortality Details</h3>
+                    {inputTypes
+                      .filter((f) => mortalityFields.map((x) => x.prop).includes(f.key))
+                      .map((f) => makeFormField(f, onChange))}
+                  </div>
+                  {/* dont show assignment history for new critters */}
+                  {!isCreatingNew && showAssignmentHistory ? (
+                    <Modal open={showAssignmentHistory} handleClose={(): void => setShowAssignmentHistory(false)}>
+                      <AssignmentHistory animalId={editing.critter_id} deviceId='' canEdit={canEdit} {...props} />
+                    </Modal>
+                  ) : null}
+                  {!isCreatingNew && showCaptureWorkflow ? (
+                    <Modal open={showCaptureWorkflow} handleClose={(): void => setShowCaptureWorkflow(false)}>
+                      <CaptureWorkflow animalId={editing.critter_id} canEdit={canEdit} {...props} />
+                    </Modal>
+                  ) : null}
+                  {!isCreatingNew && showReleaseWorkflow ? (
+                    <Modal open={showReleaseWorkflow} handleClose={(): void => setShowReleaseWorkflow(false)}>
+                      <ReleaseWorkflow animalId={editing.critter_id} canEdit={canEdit} {...props} />
+                    </Modal>
+                  ) : null}
+                  {!isCreatingNew && showMortalityWorkflow ? (
+                    <MortalityEventForm
+                      alert={alert}
+                      open={showMortalityWorkflow}
+                      handleClose={(): void => setShowMortalityWorkflow(false)}
+                      handleSave={null}
+                    />
+                  ) : null}
                 </Paper>
-                <Paper className={'paper-edit'} elevation={3}>
-                  <Typography className={'edit-form-header'} variant='h5'>
-                    Identifiers
-                  </Typography>
-                  {inputTypes
-                    .filter((f) => identifierFields.map((x) => x.prop).includes(f.key))
-                    .map((d) => makeField(d, onChange, !!errors[d.key], true))}
-                </Paper>
-                <Paper className={'paper-edit'} elevation={3}>
-                  <Typography className={'edit-form-header'} variant='h5'>
-                    Location
-                  </Typography>
-                  {inputTypes
-                    .filter((f) => locationFields.map((x) => x.prop).includes(f.key))
-                    .map((d) => makeField(d, onChange, !!errors[d.key]))}
-                </Paper>
-              </form>
-              {/* dont show assignment history for new critters */}
-              {isEdit ? <AssignmentHistory animalId={editing.critter_id} canEdit={canEdit} {...props} /> : null}
-            </>
+              </Paper>
+            </form>
           );
         }}
       </ChangeContext.Consumer>

@@ -1,37 +1,42 @@
 import { Paper, Typography } from '@material-ui/core';
 import { CritterCollarModalProps } from 'components/component_interfaces';
 import Button from 'components/form/Button';
-import { MakeEditFields } from 'components/form/create_form_components';
-import { getInputTypesOfT, validateRequiredFields, FormInputType } from 'components/form/form_helpers';
+import { MakeEditField } from 'components/form/create_form_components';
+import { getInputTypesOfT, validateRequiredFields } from 'components/form/form_helpers';
 import useModalStyles from 'components/modal/modal_styles';
 import { CollarStrings as CS } from 'constants/strings';
 import ChangeContext from 'contexts/InputChangeContext';
 import EditModal from 'pages/data/common/EditModal';
 import { useEffect, useState } from 'react';
-import { Collar, eNewCollarType } from 'types/collar';
+import { Collar, collarFormFields, eNewCollarType } from 'types/collar';
 import { removeProps } from 'utils/common';
+import AssignmentHistory from 'pages/data/animals/AssignmentHistory';
+import Modal from 'components/modal/Modal';
+import { formatLabel } from 'types/common_helpers';
+import { FormInputType } from 'types/form_types';
 
 export default function EditCollar(props: CritterCollarModalProps<Collar>): JSX.Element {
-  const { isEdit, editing } = props;
+  const { editing, isCreatingNew } = props;
   const modalClasses = useModalStyles();
+  //todo: collar editing permission?
 
   // set the collar type when add collar is selected
   const [collarType, setCollarType] = useState<eNewCollarType>(eNewCollarType.Other);
   const [newCollar, setNewCollar] = useState<Collar>(editing);
 
-  const title = isEdit ? `Editing device ${editing.device_id}` : `Add a new ${collarType} collar`;
+  const title = isCreatingNew ? `Add a new ${collarType} collar` : `Editing device ${editing.device_id}`;  
   const requiredFields = CS.requiredProps;
   const [errors, setErrors] = useState<Record<string, unknown>>({});
   const [inputTypes, setInputTypes] = useState<FormInputType[]>([]);
+  const [showAssignmentHistory, setShowAssignmentHistory] = useState<boolean>(false);
 
   useEffect(() => {
-    setInputTypes(
-      getInputTypesOfT<Collar>(
-        isEdit ? editing : newCollar,
-        allFields.map((a) => a.prop),
-        allFields.filter((f) => f.isCode).map((r) => r.prop)
-      )
+    const ipt = getInputTypesOfT<Collar>(
+      editing,
+      allFields,
+      allFields.filter((f) => f.isCode).map((r) => r.prop)
     );
+    setInputTypes(ipt);
   }, [editing, newCollar]);
 
   const validate = (o: Collar): boolean => {
@@ -50,37 +55,24 @@ export default function EditCollar(props: CritterCollarModalProps<Collar>): JSX.
     setNewCollar(new Collar(type));
   };
 
-  const generalFields = [
-    { prop: 'device_id' },
-    { prop: 'device_type', isCode: true },
-    { prop: 'device_make', isCode: true, span: true },
-    { prop: 'device_model' }
-  ];
-
-  const networkFields = [
-    { prop: 'frequency' },
-    { prop: 'frequency_unit_code', isCode: true },
-    { prop: 'satellite_network', isCode: true }
-  ];
-
-  const statusFields = [
-    { prop: 'device_status', isCode: true },
-    { prop: 'vendor_activation_status' },
-    { prop: 'device_deployment_status', isCode: true },
-    { prop: 'retrieval_date' }
-  ];
-
-  const allFields: { prop: string; isCode?: boolean }[] = [...generalFields, ...networkFields, ...statusFields];
+  const { communicationFields, deviceOptionFields, identifierFields, purchaseFields, statusFields, userCommentField } = collarFormFields;
+  const allFields = [ ...communicationFields, ...deviceOptionFields, ...identifierFields, ...purchaseFields, ...statusFields, ...userCommentField ];
 
   const makeField = (
     iType: FormInputType,
-    changeHandler: (v: Record<string, unknown>) => void,
-    hasError: boolean,
-    span?: boolean
+    handleChange: (v: Record<string, unknown>) => void,
+    isError: boolean,
   ): React.ReactNode => {
     const isRequired = requiredFields.includes(iType.key);
-    const errorText = hasError && (errors[iType.key] as string);
-    return MakeEditFields(iType, changeHandler, hasError, editing, true, isRequired, errorText, span);
+    const errorText = isError && (errors[iType.key] as string);
+    return MakeEditField({
+      formType: iType,
+      handleChange,
+      required: isRequired,
+      errorMessage: errorText,
+      label: formatLabel(editing, iType.key),
+      span: true
+    });
   };
 
   // render the choose collar type form if the add button was clicked
@@ -96,15 +88,19 @@ export default function EditCollar(props: CritterCollarModalProps<Collar>): JSX.
     );
   };
 
-  const isAddNewCollar = !isEdit && collarType === eNewCollarType.Other;
+  const padFrequency = (num: number): string => {
+    const freq = num.toString();
+    const numDecimalPlaces = freq.slice(freq.lastIndexOf('.') + 1).length;
+    const numToAdd = 3 - numDecimalPlaces + freq.length;
+    return freq.padEnd(numToAdd, '0');
+  };
+
   return (
     <EditModal
       title={title}
-      newT={new Collar()}
       onValidate={validate}
       onReset={close}
-      isEdit={isEdit}
-      hideSave={isAddNewCollar}
+      hideSave={isCreatingNew}
       {...props}>
       <ChangeContext.Consumer>
         {(handlerFromContext): React.ReactNode => {
@@ -117,31 +113,82 @@ export default function EditCollar(props: CritterCollarModalProps<Collar>): JSX.
           };
           return (
             <>
-              {isAddNewCollar ? (
+              {isCreatingNew ? (
                 chooseCollarType()
               ) : (
-                <>
-                  <form className='rootEditInput' autoComplete='off'>
-                    <Paper className={'paper-edit'} elevation={3}>
-                      <Typography className={'edit-form-header'} variant='h5'>General Information</Typography>
-                      {inputTypes
-                        .filter((f) => generalFields.map((x) => x.prop).includes(f.key))
-                        .map((d) => makeField(d, onChange, !!errors[d.key]))}
+                <form className='rootEditInput' autoComplete='off'>
+                  <Paper className={'dlg-full-title'} elevation={3}>
+                    <div className={'dlg-full-sub'}>
+                      <h1>Device ID: {editing.device_id}</h1>
+                      <div className={'dlg-full-sub'}>
+                        <span className='span'>
+                          Frequency: {editing?.frequency ? padFrequency(editing.frequency) : '-'} MHz
+                        </span>
+                        <span className='span'>|</span>
+                        <span className='span'>Deployment Status: {editing?.device_deployment_status}</span>
+                        <span className='button_span'>
+                          {!isCreatingNew ? (
+                            <Button className='button' onClick={(): void => setShowAssignmentHistory((o) => !o)}>
+                              Assign Animal to Device
+                            </Button>
+                          ) : null}
+                        </span>
+                      </div>
+                    </div>
+                  </Paper>
+                  <Paper elevation={0}>
+                    <h2>Device Details</h2>
+                    <Paper elevation={3} className={'dlg-full-body-details'}>
+                      <div className={'dlg-details-section'}>
+                        <h3>Identifiers</h3>
+                        {inputTypes
+                          .filter((f) => identifierFields.map((x) => x.prop).includes(f.key))
+                          .map((d) => makeField(d, onChange, !!errors[d.key]))}
+                      </div>
+                      <div className={'dlg-details-section'}>
+                        <h3>Device Status</h3>
+                        {inputTypes
+                          .filter((f) => statusFields.map((x) => x.prop).includes(f.key))
+                          .map((d) => makeField(d, onChange, !!errors[d.key]))}
+                      </div>
+                      <div className={'dlg-details-section'}>
+                        <h3>Satellite Network &amp; Beacon Frequency</h3>
+                        {inputTypes
+                          .filter((f) => communicationFields.map((x) => x.prop).includes(f.key))
+                          .map((d) => makeField(d, onChange, !!errors[d.key]))}
+                      </div>
+                      <div className={'dlg-details-section'}>
+                        <h3>Comments About This Device</h3>
+                        {inputTypes
+                          .filter((f) => userCommentField.map((x) => x.prop).includes(f.key))
+                          .map((d) => makeField(d, onChange, !!errors[d.key]))}
+                      </div>
+                      <div className={'dlg-details-section'}>
+                        <h3>Additional Device Sensors &amp; Features</h3>
+                        {inputTypes
+                          .filter((f) => deviceOptionFields.map((x) => x.prop).includes(f.key))
+                          .map((d) => makeField(d, onChange, !!errors[d.key]))}
+                      </div>
+                      <div className={'dlg-details-section'}>
+                        <h3>Purchase Details</h3>
+                        {inputTypes
+                          .filter((f) => purchaseFields.map((x) => x.prop).includes(f.key))
+                          .map((d) => makeField(d, onChange, !!errors[d.key]))}
+                      </div>
+                      {!isCreatingNew && showAssignmentHistory ? (
+                        <Modal open={showAssignmentHistory} handleClose={(): void => setShowAssignmentHistory(false)}>
+                          <AssignmentHistory
+                            assignAnimalToDevice={true}
+                            animalId=''
+                            deviceId={editing.collar_id}
+                            canEdit={true}
+                            {...props}
+                          />
+                        </Modal>
+                      ) : null}
                     </Paper>
-                    <Paper className={'paper-edit'} elevation={3}>
-                      <Typography className={'edit-form-header'} variant='h5'>Frequency and Network</Typography>
-                      {inputTypes
-                        .filter((f) => networkFields.map((x) => x.prop).includes(f.key))
-                        .map((d) => makeField(d, onChange, !!errors[d.key]))}
-                    </Paper>
-                    <Paper className={'paper-edit'} elevation={3}>
-                      <Typography className={'edit-form-header'} variant='h5'>Status Information</Typography>
-                      {inputTypes
-                        .filter((f) => statusFields.map((x) => x.prop).includes(f.key))
-                        .map((d) => makeField(d, onChange, !!errors[d.key]))}
-                    </Paper>
-                  </form>
-                </>
+                  </Paper>
+                </form>
               )}
             </>
           );

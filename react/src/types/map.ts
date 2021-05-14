@@ -3,7 +3,7 @@ import { GeoJsonObject, LineString, Point, Position } from 'geojson';
 import { IAnimalTelemetryBase } from 'types/animal';
 import { ICollarTelemetryBase } from 'types/collar';
 import { columnToHeader } from 'utils/common';
-import { formatWithUTCOffset } from 'utils/time';
+import { dateObjectToDateStr } from 'utils/time';
 import { BCTW, BCTWType } from './common_types';
 
 interface MapRange {
@@ -58,7 +58,7 @@ interface ITelemetryGroup {
   features: ITelemetryPoint[];
 }
 
-// represents the jsonb built object in the database get_telemetry call
+// represents the jsonb object in the get_telemetry pg function
 export class TelemetryDetail implements BCTW, ITelemetryDetail {
   critter_id: string;
   species: string;
@@ -72,29 +72,27 @@ export class TelemetryDetail implements BCTW, ITelemetryDetail {
   device_id: number;
   device_vendor: string;
   frequency: number;
+  frequency_unit: string;
   device_status: string;
-  location: string;
+  collective_unit: string;
   @Type(() => Date) date_recorded: Date;
   @Type(() => Date) mortality_date: Date;
   @Expose() get formattedDevice(): string {
     return `${this.device_id} (${this.device_vendor}) `;
   }
   @Expose() get formattedDate(): string {
-    return formatWithUTCOffset(this.date_recorded);
+    return dateObjectToDateStr(this.date_recorded);
   }
-  animal_colour: string;
+  @Expose() get formattedCaptureDate(): string {
+    return this.capture_date ? dateObjectToDateStr(this.capture_date) : '';
+  }
+  @Expose() get paddedFrequency(): string {
+    return this.frequency ? padFrequency(this.frequency) : '';
+  }
+  map_colour: string;
 
   formatPropAsHeader(str: string): string {
-    switch (str) {
-      case 'wlh_id':
-        return 'WLH ID';
-      case 'animal_id':
-        return 'Animal ID';
-      case 'device_id':
-        return 'Device ID';
-      default:
-        return columnToHeader(str);
-    }
+    return columnToHeader(str);
   }
 }
 
@@ -119,6 +117,13 @@ const doesPointArrayContainPoint = (pings: Position[], coord: Position): boolean
     }
   }
   return false;
+}
+
+const padFrequency = (num: number): string => {
+  const freq = num.toString();
+  const numDecimalPlaces = freq.slice(freq.lastIndexOf('.') + 1).length;
+  const numToAdd = (3 - numDecimalPlaces) + freq.length;
+  return freq.padEnd(numToAdd, '0');
 }
 
 export type {

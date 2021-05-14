@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 // Icons
 import Icon from '@mdi/react';
-import { mdiAccountCircle, mdiAccountRemove, mdiProgressClock } from '@mdi/js';
+import { mdiAccountCircle, mdiAccountRemove, mdiProgressClock, mdiBell } from '@mdi/js';
 
 // Assets
 import 'styles/AppHeader.scss';
@@ -12,20 +12,32 @@ import headerImage from 'assets/images/gov3_bc_logo.png';
 import { UserContext } from 'contexts/UserContext';
 import { User } from 'types/user';
 import { IconButton } from '@material-ui/core';
+import { AlertContext } from 'contexts/UserAlertContext';
+import UserAlert from 'pages/user/UserAlert';
+import Modal from 'components/modal/Modal';
 
 type AppheaderProps = {
   children?: JSX.Element;
-}
+};
 
-const AppHeader = ({children}: AppheaderProps): JSX.Element => {
+const AppHeader = ({ children }: AppheaderProps): JSX.Element => {
   const useUser = useContext(UserContext);
   const [user, setUser] = useState<User>(null);
+  const useAlert = useContext(AlertContext);
+  const [alertCount, setAlertCount] = useState<number>(0);
+  const [showAlerts, setShowAlerts] = useState<boolean>(false);
 
   useEffect(() => {
     if (useUser.ready) {
       setUser(useUser.user);
     }
   }, [useUser]);
+
+  useEffect(() => {
+    if (useAlert?.alerts?.length) {
+      setAlertCount(useAlert.alerts.length);
+    }
+  }, [useAlert]);
 
   return (
     <header className={'app-header'}>
@@ -36,12 +48,36 @@ const AppHeader = ({children}: AppheaderProps): JSX.Element => {
         </Link>
         <nav className={'app-nav'}>
           <ul>
-            <li><Link to='/map' color={'inherit'}>Home</Link></li>
-            <li><Link to='/data' color={'inherit'}>Manage</Link></li>
+            <li>
+              <Link to='/map' color={'inherit'}>
+                Home
+              </Link>
+            </li>
+            <li>
+              <Link to='/data' color={'inherit'}>
+                Manage
+              </Link>
+            </li>
           </ul>
         </nav>
         <nav className='profile-nav'>
           <ul className={'header-ul'}>
+            {alertCount > 0 ? (
+              <li>
+                <div className={'alerts'}>
+                  <IconButton onClick={(): void => setShowAlerts((o) => !o)} disabled={!alertCount}>
+                    <Icon
+                      path={mdiBell}
+                      color={alertCount ? 'red' : 'white'}
+                      className={'icon'}
+                      title='User Alerts'
+                      size={1}
+                    />
+                    {alertCount}
+                  </IconButton>
+                </div>
+              </li>
+            ) : null}
             <li>
               <div className={'username'}>
                 <IconButton component={Link} to='/profile'>
@@ -60,12 +96,13 @@ const AppHeader = ({children}: AppheaderProps): JSX.Element => {
                 Log out
               </Button>
             </li>
-            <li>
-              {children}
-            </li>
+            <li>{children}</li>
           </ul>
         </nav>
       </div>
+      <Modal open={showAlerts} handleClose={(): void => setShowAlerts(false)}>
+        <UserAlert />
+      </Modal>
     </header>
   );
 };

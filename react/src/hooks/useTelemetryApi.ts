@@ -255,7 +255,7 @@ export const useTelemetryApi = () => {
    * @returns
    */
   const useType = <T extends BCTW>(type: BCTWType, id: string): UseQueryResult<T> => {
-    return useQuery<T, AxiosError>(['getType', type], () => bulkApi.getType(type, id), {
+    return useQuery<T, AxiosError>(['getType', type, id], () => bulkApi.getType(type, id), {
       ...defaultQueryOptions
     });
   };
@@ -341,6 +341,9 @@ export const useTelemetryApi = () => {
   const useMutateUDF = (config: UseMutationOptions<IUDF[], AxiosError, IUDFInput[]>): UseMutationResult<IUDF[]> =>
     useMutation<IUDF[], AxiosError, IUDFInput[]>((body) => userApi.upsertUDF(body), config);
 
+  const useMutateUserAlert = (config: UseMutationOptions<TelemetryAlert[], AxiosError, TelemetryAlert[]>): UseMutationResult<TelemetryAlert[]> =>
+    useMutation<TelemetryAlert[], AxiosError, TelemetryAlert[]>((body) => userApi.updateAlert(body), config);
+
   return {
     // queries
     useAlert,
@@ -372,6 +375,7 @@ export const useTelemetryApi = () => {
     useMutateLinkCollar,
     useMutateGrantCritterAccess,
     useMutateUDF,
-    useDelete
+    useDelete,
+    useMutateUserAlert,
   };
 };

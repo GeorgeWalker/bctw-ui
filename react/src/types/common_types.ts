@@ -1,9 +1,16 @@
+// BCTW metadata classes (ex. Animal, Collar) inherit this interface
 export type BCTW = {
+  // formats props as a header/label
   formatPropAsHeader?: (str: string) => string;
-  identifier?: string; // used in tables to identify unique rows
+  // some classes will use this before posting to API
+  // ex. to remove unwanted properties that should not be preserved 
+  toJSON?: () => unknown;
+  // only used in tables to identify unique rows
+  identifier?: string; 
 }
 
-export interface BctwBaseType {
+// (nearly) all BCTW types contain these properties.
+export interface BCTWBaseType {
   created_at?: Date;
   created_by_user_id?: number;
   updated_at?: Date;

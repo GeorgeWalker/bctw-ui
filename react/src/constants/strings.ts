@@ -18,6 +18,14 @@ const FileStrings = {
   templateButtonText: 'Download Template',
 }
 
+const WorkflowStrings = {
+  captureWorkflowTitle: 'Capture Event Workflow',
+  releaseWorkflowTitle: 'Release Event Workflow',
+  mortalityWorkflowTitle: 'Mortality Event Workflow',
+  locationEventCoordTypeUTM: 'Use UTM',
+  locationEventCoordTypeLat: 'Use Lat/Long',
+}
+
 const CollarStrings = {
   assignedCollarsTableTitle: 'Assigned Devices',
   availableCollarsTableTitle: 'Unassigned Devices',
@@ -32,7 +40,8 @@ const CollarStrings = {
   addCollarVHF: 'VHF Device',
   importTitle: 'Bulk Import VHF Devices',
   importText: 'Use this feature to add multiple new devices.',
-  assignmentHistoryTitle: 'Device Assignment History',
+  assignmentHistoryByAnimalTitle: 'History of Devices Assigned',
+  assignmentHistoryByDeviceTitle: 'History of Animals Assigned',
   collarImportStartMsg: 'What do you want to do?',
   collarImportKeyX: 'Create new Vectronic devices using .keyx file(s)',
   collarImportDowloadTemplate: 'Download a CSV template for importing device metadata',
@@ -47,19 +56,35 @@ const CodeStrings = {
 }
 
 const MapStrings = {
-  lastPingLabel: 'Last Known Location',
-  lastFixesLabel: 'Last 10 Fixes',
-  onlySelectedLabel: 'Show Only Selected',
-  filterRangeStart: 'Start Date',
-  filterRangeEnd: 'End Date',
-  filterUserCritterGroup: 'Custom Animal Group',
-  deviceSelectedLabel: 'Device List',
+  startDateLabel: 'Start Date',
+  startDateTooltip: 'startDateTooltip',
+  endDateLabel: 'End Date',
+  endDateTooltip: 'endDateTooltip',
   assignmentStatusLabel: 'Device Assignment Status',
   assignmentStatusOptionA: 'Assigned Devices',
   assignmentStatusOptionU: 'Unassigned Devices',
   assignmentStatusTooltip1: ': shows device telemetry that currently has an animal attached.',
   assignmentStatusTooltip2: ': show device telemetry that does not have an animal attached.',
-  assignmentStatusTooltip3: 'To attach a device, click Manage from the top navigation bar and edit an animal.',
+  assignmentStatusTooltip3: 'To attach a device, click Manage from the top navigation bar and edit an animal.',  
+  lastKnownLocationLabel: 'Last Known Location',
+  lastKnownLocationTooltip: 'lastKnownLocationTooltip',
+  lastFixesLabel: 'Last 10 Fixes',
+  lastFixesTooltip: 'lastFixesTooltip',
+  deviceListLabel: 'Device List',
+  deviceListTooltip: 'deviceListTooltip',
+  speciesTooltip: 'speciesTooltip',
+  animalStatusTooltip: 'animalStatusTooltip',
+  deviceStatusTooltip: 'deviceStatusTooltip',
+  sexTooltip: 'sexTooltip',
+  customAnimalGroupLabel: 'Custom Animal Group',
+  customAnimalGroupLabelTooltip: 'customAnimalGroupLabelTooltip',
+  showOnlyCheckedLabel: 'Show Only Checked',
+  showOnlyCheckedTooltip: 'showOnlyCheckedTooltip',
+  toggleFixesLabel: 'Toggle fixes',
+  toggleTracksLabel: 'Toggle tracks',
+  drawLineLabel: 'Measure distance',
+  drawPolygonLabel: 'Select fixes by drawing a polygon',
+  drawRectangleLabel: 'Select fixes by drawing a rectangle',
 }
 
 const MapTileLayers = {
@@ -69,14 +94,29 @@ const MapTileLayers = {
 
 const FormStrings = {
   emptySelectValue: 'Blank',
+  validateNegativeLongitude: 'Longitude must be negative',
+  validateNumber: 'Must be a number',
+}
+
+const UserAlertStrings = {
+  snoozeConfirmation: (remainingCount: number): string => {
+    if (remainingCount === 1) {
+      return `There is only one snooze remaining! Tomorrow you will be forced to update. Are you sure you want to snooze?`
+    }
+    return `There are ${remainingCount} snoozes remaining. Are you sure you want to snooze the alert until tomorrow?`;
+  },
+  noMoreSnoozes: 'Maximum number of snoozes performed, you must perform the alert update',
+  mortalityFormTitle: 'Mortality Event',
 }
 
 export {
   CodeStrings,
   CollarStrings,
   CritterStrings,
+  FileStrings,
   FormStrings,
   MapStrings,
   MapTileLayers,
-  FileStrings,
+  UserAlertStrings,
+  WorkflowStrings,
 }

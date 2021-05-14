@@ -8,7 +8,6 @@ export interface ICollarHistory extends ICollarBase, BCTW {
   animal_id?: string; // the animal id (uuid key of animal table)
   assignment_id: string; // uuid
   device_make: string;
-  // radio_frequency: number;
   valid_from: Date;
   valid_to: Date;
 }
@@ -17,7 +16,6 @@ export class CollarHistory implements ICollarHistory {
   collar_id: string;
   assignment_id: string;
   device_make: string;
-  // radio_frequency: number;
   @Type(() => Date) valid_from: Date;
   @Type(() => Date) valid_to: Date;
   @Expose() get identifier(): string { return 'assignment_id' }
@@ -26,8 +24,6 @@ export class CollarHistory implements ICollarHistory {
     switch (str) {
       case this.identifier:
         return 'Assignment ID';
-      case 'device_id':
-        return 'Device ID';
       default:
         return columnToHeader(str);
     }

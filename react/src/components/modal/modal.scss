@@ -1,5 +1,11 @@
 @import 'styles/colours.scss';
 
+// dialogs in non-fullscreen have 600px max by default
+.dialog-modal {
+  .MuiDialog-paperWidthSm {
+    max-width: 80%;
+  }
+}
 .MuiDialog-paperFullScreen {
   background-color: #f1f3f5 !important;
 }
@@ -11,65 +17,37 @@
 }
 
 .dlg-full-title {
-  padding: 1rem 5rem;
-
+  padding: 1rem 4rem;
   h1 {
     display: inline;
     margin-right: 1rem;
   }
-  button {
-    margin-bottom: 1rem;
-  }
-  h4 {
-    text-decoration: none solid rgb(73, 80, 87);
-  }
-  .dlg-nav {
-    color: $BCgovBlue;
+  h3 {
+    display: inline;
+    margin-right: 1rem;
   }
 }
 
 .dlg-full-sub {
-  span {
+  .span {
     margin-right: 1rem;
     font-size: larger;
     color: #495057;
   }
-}
-
-.dlg-full-body {
-  background-color: #f1f3f5 !important;
-  padding: 1.5rem 4rem;
-}
-
-.dlg-title-btn {
-  background-color: #1976d2 !important;
-}
-
-.dlg-full-body-subtitle {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-content: center;
-
-  .MuiButton-outlinedPrimary {
-    background-color: #ffffff;
-    border: 0.15rem solid $BCgovBlue;
-    color: $BCgovBlue;
-    height: 2.5rem;
-    margin-top: 1rem;
+  .button_span {
+    float:right;
+  }
+  .button {
+    margin-left: 0.5em;
   }
 }
 
 .dlg-full-body-details {
-  background-color: #fff !important;
   margin-bottom: 2rem;
 }
 
 .dlg-details-section {
   border-bottom: 1px solid #ced4da;
-}
-
-.dlg-details-content {
   padding: 0.5rem 1.5rem;
   margin-bottom: 1px solid;
 }

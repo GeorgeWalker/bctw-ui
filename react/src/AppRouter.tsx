@@ -14,45 +14,26 @@ export type RouteKey = {
   path: string;
   title: string;
   name: string;
-  component: FunctionComponent<{ setSidebarContent: (component: JSX.Element) => void }>;
+  component: FunctionComponent<{ /*setSidebarContent: (component: JSX.Element) => void */ }>;
   sort: number;
   icon?: string;
   requiresAdmin?: boolean;
 };
 
 const AppRoutes: RouteKey[] = [
-  {
-    name: 'animals',
-    path: '/animals',
-    title: 'Animals',
-    component: CritterPage,
-    sort: 1,
-    icon: 'critter'
-  },
-  { name: 'codes', path: '/codes', title: 'Codes', component: CodePage, sort: 1, icon: 'code' },
+  { name: 'animals', path: '/animals', title: 'Animals', component: CritterPage, sort: 1, icon: 'critter' },
+  { name: 'codes', path: '/codes', title: 'Codes', component: CodePage, sort: 2, icon: 'code' },
   { name: 'devices', path: '/devices', title: 'Devices', component: CollarPage, sort: 1, icon: 'collar' },
   { name: 'map', path: '/map', title: 'Location Map', component: MapPage, sort: 1, icon: 'map' },
   { name: 'terrain', path: '/terrain', title: 'Terrain Viewer', component: TerrainPage, sort: 1, icon: 'terrain' },
   { name: 'home', path: '/home', title: 'Home', component: Home, sort: 0, icon: 'home' },
   { name: 'profile', path: '/profile', title: 'Profile', component: UserProfile, sort: 2, icon: 'profile' },
-  { name: 'admin', path: '/admin', title: 'Admin', component: AdminPage, sort: 2, icon: 'admin' },
-  {
-    name: 'notFound',
-    path: '/*',
-    title: 'Not Found',
-    component: (): JSX.Element => <div>page not found!</div>,
-    sort: 2
-  }
+  { name: 'admin', path: '/admin', title: 'Admin', component: AdminPage, sort: 3, icon: 'admin' },
+  { name: 'notFound', path: '/*', title: 'Not Found', component: (): JSX.Element => <div>page not found!</div>, sort: 2 }
 ];
 
-type AppRouterProps = {
-  onContentChange: (component: JSX.Element) => void;
-};
-
-const AppRouter = ({ onContentChange }: AppRouterProps): JSX.Element => {
-  const routeProps = { setSidebarContent: onContentChange };
+const AppRouter = (): JSX.Element => {
   const history = useHistory();
-
   useEffect(() => {
     return history.listen((location) => {
       // wipe the sidebar content when navigation to new page
@@ -71,7 +52,7 @@ const AppRouter = ({ onContentChange }: AppRouterProps): JSX.Element => {
             path={route.path}
             render={(): JSX.Element => {
               const RouteComponent = route.component;
-              return <RouteComponent {...routeProps} />;
+              return <RouteComponent />;
             }}
           />
         );

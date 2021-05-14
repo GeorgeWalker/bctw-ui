@@ -1,5 +1,5 @@
 @import 'styles/colours.scss';
-$appearAboveMap: 314159;
+$appearAboveMap: 1001;
 
 .map-container {
   flex: 1 1 auto;
@@ -44,14 +44,14 @@ $appearAboveMap: 314159;
 }
 
 //
-// side panel
+// filter panel
 //
 
 .side-panel-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 3rem;
+  padding: 0 1rem;
 }
 
 .side-panel-toolbar-closed {
@@ -75,7 +75,7 @@ $appearAboveMap: 314159;
 }
 
 .side-panel-dates {
-  .MuiFormControl-root.MuiTextField-root {
+  .MuiFormControl-root.MuiTextField-root:nth-child(odd) {
     margin-right: 0.5rem;
   }
 }
@@ -93,7 +93,6 @@ $appearAboveMap: 314159;
 .side-panel-body {
   display: flex;
   flex-direction: column;
-  // padding: 0 2rem;
   margin: 0 auto;
 }
 
@@ -130,16 +129,15 @@ $appearAboveMap: 314159;
     overflow-x: hidden;
   }
   #drag {
-    height: 1px;
-    background-color: #000;
+    height: 4px;
+    background-color: #808080;
     cursor: n-resize;
   }
 }
 
 
 .bottom-tbl {
-  height: 70%;
-  // max-height: 24rem;
+  height: 80%;
 }
 
 // must be at least this index to appear for full-screen dialog
@@ -187,5 +185,50 @@ $appearAboveMap: 314159;
 
 // hover effect when selecting a point / drawing a shape in map
 .bottom-panel-row-is-map-selected {
-  background-color: lavender;
+  background-color: $BCgovGold;
+}
+
+//
+// map page html icons
+// 
+
+// the leaflet icon that is always hidden
+.marker-popup {
+  visibility: hidden;
+}
+
+.map-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  width: 2.85rem;
+  height: 2.85rem;
+  z-index: 1000;
+  border-radius: 4px;
+  cursor: pointer;
+  left: 10px;
+}
+
+// toggles 3-2D
+.map-dimension-btn {
+  top: 10px;
+}
+
+.map-toggle-pings-btn {
+  top: 240px;
+}
+
+.map-toggle-tracks-btn {
+  top: 295px;
+}
+
+.icon-on {
+  background-color: $appHeaderColor;
+  color: #464646;
+}
+
+.icon-off {
+  color: $appHeaderColor;
+  background-color:#BEBEBE;
 }

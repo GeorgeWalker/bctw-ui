@@ -4,19 +4,13 @@ import { AxiosError } from "axios";
  * @param {K} key
  * @param {T} object of type T
  * given a property name of an object T, return its type.
- * let x = { foo: 10, bar: "hello!" };
- * getProperty(x, "foo"); // number
+  ex.
+    let x = { foo: 10, bar: "hello!" };
+    getProperty(x, "foo"); // number
 **/
 function getProperty<T, K extends keyof T>(obj: T, key: K): unknown {
   return obj[key]; // Inferred type is T[K]
 }
-
-// function getKey<T, K extends keyof T>(obj: T, key: string): keyof T {
-//   if (Object.prototype.hasOwnProperty.call(obj, key)) {
-//     return key as keyof T;
-//   }
-//   return null;
-// }
 
 /**
  * shallow compare of objects for use in forms
@@ -42,7 +36,10 @@ const objectCompare = (o1: Record<string, unknown>, o2: Record<string, unknown>)
  * @param prop - property name to format
  */
 const columnToHeader = (prop: string): string => {
-  const asArr = prop.replaceAll('_', ' ').split(' ');
+  const asArr = prop
+    .replaceAll('_', ' ')
+    .replaceAll(' id', ' ID')
+    .split(' ');
   return asArr.map((a) => a.charAt(0).toUpperCase() + a.slice(1)).join(' ');
 };
 
@@ -52,7 +49,7 @@ const columnToHeader = (prop: string): string => {
 const omitNull = <T,>(obj: T): T => {
   const copy = Object.assign(obj, {});
   Object.keys(copy)
-    .filter(k => obj[k] === null || obj[k] === undefined || obj[k] === '')
+    .filter(k => obj[k] === null || obj[k] === undefined || obj[k] === '' || obj[k] === 'null' || obj[k] === -1)
     .forEach(k => delete (obj[k]));
   return copy;
 }
@@ -69,13 +66,9 @@ const removeProps = <T,>(obj: T, propsToRemove: string[]): T => {
 }
 
 /**
- * @param err 
+ * formats an Axios error to a string
  */
 const formatAxiosError = (err: AxiosError): string => `${err.response?.data ?? err.message}`;
-
-const onlyUniqueArray = (value, index, self) => {
-  return self.indexOf(value) === index;
-}
 
 export {
   columnToHeader,
@@ -84,5 +77,4 @@ export {
   objectCompare,
   omitNull,
   removeProps,
-  onlyUniqueArray,
 };
