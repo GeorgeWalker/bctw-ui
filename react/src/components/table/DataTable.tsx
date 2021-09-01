@@ -271,7 +271,7 @@ export default function DataTable<T extends BCTWBase>({
                         if (!k) {
                           return null;
                         }
-                        const { align, value } = formatTableCell(obj, k);
+                        const { value } = formatTableCell(obj, k);
                         return (
                           <TableCell key={`${k}${i}`} align={'left'}>
                             {value}

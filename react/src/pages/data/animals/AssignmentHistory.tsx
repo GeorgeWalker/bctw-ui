@@ -8,19 +8,18 @@ import { ModalBaseProps } from 'components/component_interfaces';
 import { Modal } from 'components/common';
 import { eCritterPermission } from 'types/permission';
 
-export type IAssignmentHistoryProps = Pick<ModalBaseProps, 'open' | 'handleClose'> & {
+export type IAssignmentHistoryPageProps = Pick<ModalBaseProps, 'open' | 'handleClose'> & {
   critter_id: string;
   permission_type: eCritterPermission; 
 };
 
 /**
  * displays a table with collar history and collar assign/unassign handling components
- * todo: properly enable assignment to animal from edit device
 */
-export default function AssignmentHistory(props: IAssignmentHistoryProps): JSX.Element {
+export default function AssignmentHistory(props: IAssignmentHistoryPageProps): JSX.Element {
   const { critter_id, open, handleClose } = props;
   const bctwApi = useTelemetryApi();
-  const [attachedCollarID, setAttachedCollarID] = useState<string>('');
+  const [attachedDevice, setAttachedDevice] = useState<CollarHistory>({} as CollarHistory);
   const [history, setCollarHistory] = useState<CollarHistory[]>([]);
 
   const onNewData = (d: CollarHistory[]): void => {
@@ -28,9 +27,9 @@ export default function AssignmentHistory(props: IAssignmentHistoryProps): JSX.E
   };
 
   useEffect(() => {
-    if (history?.length) {
+    if (history.length) {
       const attachment = hasCollarCurrentlyAssigned(history);
-      setAttachedCollarID(attachment?.collar_id);
+      setAttachedDevice(attachment);
     }
   }, [history]);
 
@@ -42,7 +41,7 @@ export default function AssignmentHistory(props: IAssignmentHistoryProps): JSX.E
         queryProps={{ query: bctwApi.useCollarAssignmentHistory, param: critter_id, onNewData: onNewData }}
         paginate={history?.length >= 10}
       />
-      <PerformAssignmentAction collar_id={attachedCollarID} {...props} />
+      <PerformAssignmentAction current_attachment={attachedDevice} {...props} />
     </Modal>
   );
 }

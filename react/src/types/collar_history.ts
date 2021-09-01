@@ -1,37 +1,96 @@
-import { ICollarBase } from 'types/collar';
-import { BCTWBase } from 'types/common_types';
+import { Collar } from 'types/collar';
+import { BCTWBase, BCTWBaseType } from 'types/common_types';
 import { Type, Expose } from 'class-transformer';
 import dayjs from 'dayjs';
 import { columnToHeader } from 'utils/common_helpers';
-// todo: extend dates from base class
 
-// used to construct objects for removing or attaching a collar device to a critter
-export interface ICollarLinkPayload {
-  isLink: boolean;
-  data: {
-    critter_id: string;
-    collar_id: string;
-    valid_from?: Date | string;
-    valid_to?: Date | string;
-  };
+/**
+ * the attachment attachment start and data life start date time props
+ * the inner bounding data_life_start should be after the actual start
+ */
+interface IDataLifeStartProps {
+  actual_start: Date | string;
+  data_life_start: Date | string;
+}
+/**
+ * the attachment end and data life end date time props
+ * the inner bounding data_life_end should be before the actual end
+ */
+interface IDataLifeEndProps {
+  actual_end?: Date | string;
+  data_life_end?: Date | string;
 }
 
-// animal/device attachment history
-export interface ICollarHistory extends ICollarBase {
-  critter_id?: string;
-  assignment_id: string; // unique identifier of the animal/device relationship
-  device_make: string;
-  valid_from: Date;
-  valid_to: Date;
+// combined data life props
+export interface IDataLifeInputProps extends IDataLifeStartProps, IDataLifeEndProps { }
+
+/**
+ * used in the Data Life input component
+ */
+export class DataLifeInput implements IDataLifeStartProps, IDataLifeEndProps {
+  actual_end: Date;
+  actual_start: Date;
+  data_life_end: Date;
+  data_life_start: Date;
+
+  constructor(history?: CollarHistory) {
+    const d = new Date();
+    this.actual_start = history?.attachment_start ?? d;
+    this.actual_end = history?.attachment_end ?? d;
+    this.data_life_start = history?.valid_from ?? d;
+    this.data_life_end = history?.valid_to ?? d;
+    // console.log('created new DataLifeInput', JSON.stringify(this));
+  }
 }
 
-export class CollarHistory extends BCTWBase implements ICollarHistory {
+// passed to the API when attaching a device to an animal
+export interface IAttachDeviceProps extends IDataLifeStartProps, IDataLifeEndProps {
   collar_id: string;
+  critter_id: string;
+}
+
+// passed to the API when removing a device from an animal
+export interface IRemoveDeviceProps extends Required<IDataLifeEndProps> {
   assignment_id: string;
+}
+
+// passed to the API when changing the data life of an existing or past device attachment
+export interface IChangeDataLifeProps extends Pick<IRemoveDeviceProps, 'assignment_id'> {
+  data_life_start: Date | string;
+  data_life_end: Date | string;
+}
+
+export interface ICollarHistory extends Pick<Collar, 'collar_id' | 'device_id' | 'device_make' | 'frequency'>,
+  Pick<BCTWBaseType, 'valid_from' | 'valid_to'> {
+  assignment_id: string;
+  critter_id: string;
+  attachment_start: Date;
+  attachment_end: Date;
+}
+
+/**
+ * represents an device attachment to an animal.
+ * fixme: sync data life props with this class?
+ */
+export class CollarHistory extends BCTWBase implements ICollarHistory {
+  assignment_id: string; // primary key of the collar_animal_assignment table
+  collar_id: string;
+  critter_id: string;
+  device_id: number;
   device_make: string;
-  @Type(() => Date) valid_from: Date;
-  @Type(() => Date) valid_to: Date;
+  frequency: number;
+  @Type(() => Date) valid_from: Date; // data_life_start
+  @Type(() => Date) valid_to: Date; // data_life_end
+  @Type(() => Date) attachment_start: Date; // actual_start
+  @Type(() => Date) attachment_end: Date; // actual_end
   @Expose() get identifier(): string { return 'assignment_id' }
+
+  @Expose() get canChangeDatalifeStart(): boolean {
+    return false;
+  }
+  @Expose() get canChangeDatalifeEnd(): boolean {
+    return false;
+  }
 
   toJSON(): CollarHistory {
     return this;
