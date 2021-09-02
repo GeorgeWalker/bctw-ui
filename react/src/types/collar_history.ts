@@ -3,13 +3,14 @@ import { BCTWBase, BCTWBaseType } from 'types/common_types';
 import { Type, Expose } from 'class-transformer';
 import dayjs from 'dayjs';
 import { columnToHeader } from 'utils/common_helpers';
+import { eCritterPermission } from './permission';
 
 /**
  * the attachment attachment start and data life start date time props
  * the inner bounding data_life_start should be after the actual start
  */
 interface IDataLifeStartProps {
-  actual_start: Date | string;
+  attachment_start: Date | string;
   data_life_start: Date | string;
 }
 /**
@@ -17,7 +18,7 @@ interface IDataLifeStartProps {
  * the inner bounding data_life_end should be before the actual end
  */
 interface IDataLifeEndProps {
-  actual_end?: Date | string;
+  attachment_end?: Date | string;
   data_life_end?: Date | string;
 }
 
@@ -28,15 +29,15 @@ export interface IDataLifeInputProps extends IDataLifeStartProps, IDataLifeEndPr
  * used in the Data Life input component
  */
 export class DataLifeInput implements IDataLifeStartProps, IDataLifeEndProps {
-  actual_end: Date;
-  actual_start: Date;
+  attachment_end: Date;
+  attachment_start: Date;
   data_life_end: Date;
   data_life_start: Date;
 
   constructor(history?: CollarHistory) {
     const d = new Date();
-    this.actual_start = history?.attachment_start ?? d;
-    this.actual_end = history?.attachment_end ?? d;
+    this.attachment_start = history?.attachment_start ?? d;
+    this.attachment_end = history?.attachment_end ?? d;
     this.data_life_start = history?.valid_from ?? d;
     this.data_life_end = history?.valid_to ?? d;
     // console.log('created new DataLifeInput', JSON.stringify(this));
@@ -81,15 +82,15 @@ export class CollarHistory extends BCTWBase implements ICollarHistory {
   frequency: number;
   @Type(() => Date) valid_from: Date; // data_life_start
   @Type(() => Date) valid_to: Date; // data_life_end
-  @Type(() => Date) attachment_start: Date; // actual_start
-  @Type(() => Date) attachment_end: Date; // actual_end
+  @Type(() => Date) attachment_start: Date;
+  @Type(() => Date) attachment_end: Date;
   @Expose() get identifier(): string { return 'assignment_id' }
 
-  @Expose() get canChangeDatalifeStart(): boolean {
-    return false;
+  canChangeDatalifeStart(perm: eCritterPermission): boolean {
+    return perm === eCritterPermission.admin || this.valid_from !== this.attachment_start;
   }
-  @Expose() get canChangeDatalifeEnd(): boolean {
-    return false;
+  canChangeDatalifeEnd(perm: eCritterPermission): boolean {
+    return perm === eCritterPermission.admin || this.valid_to !== this.attachment_end;
   }
 
   toJSON(): CollarHistory {

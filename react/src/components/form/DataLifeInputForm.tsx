@@ -17,17 +17,17 @@ const getFirstValue = (d: DateTimeChangeOutput): string => Object.values(d)[0];
  */
 export default function DataLifeInputForm(props: DataLifeInputProps): JSX.Element {
   const { dli, showStart, showEnd } = props;
-  const [minDate, setMinDate] = useState<Date>(dli.actual_start);
-  const [maxDate, setMaxDate] = useState<Date>(dli.actual_end);
+  const [minDate, setMinDate] = useState<Date>(dli.attachment_start);
+  const [maxDate, setMaxDate] = useState<Date>(dli.attachment_end);
 
   // since the DataLifeInput instance is an object, no need for change handlers
   const handleDateOrTimeChange = (d: DateTimeChangeOutput): void => {
     const k = getFirstKey(d);
     const v = getFirstValue(d);
     dli[k] = v;
-    if (k === 'actual_start') {
+    if (k === 'attachment_start') {
       setMinDate(new Date(v));
-    } else if (k === 'actual_end') {
+    } else if (k === 'attachment_end') {
       setMaxDate(new Date(v));
     }
   };
@@ -36,10 +36,10 @@ export default function DataLifeInputForm(props: DataLifeInputProps): JSX.Elemen
     <>
       <div>
         <DateTimeInput
-          propName='actual_start'
+          propName='attachment_start'
           changeHandler={handleDateOrTimeChange}
           label='actual start'
-          defaultValue={dli.actual_start}
+          defaultValue={dli.attachment_start}
           disabled={!showStart}
         />
         <DateTimeInput
@@ -53,10 +53,10 @@ export default function DataLifeInputForm(props: DataLifeInputProps): JSX.Elemen
       </div>
       <div>
         <DateTimeInput
-          propName='actual_end'
+          propName='attachment_end'
           changeHandler={handleDateOrTimeChange}
           label='actual end'
-          defaultValue={dli.actual_end}
+          defaultValue={dli.attachment_end}
           disabled={!showEnd}
         />
         <DateTimeInput

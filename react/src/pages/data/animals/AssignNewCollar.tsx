@@ -32,11 +32,11 @@ export default function AssignNewCollarModal({ critter_id, dli, onClose, show, o
   const handleSelectDevice = (row: Collar): void => setCollarId(row.collar_id);
 
   const handleSave = (): void => {
-    const { actual_start, data_life_start } = DLInput;
+    const { attachment_start, data_life_start } = DLInput;
     const body: IAttachDeviceProps = {
       critter_id,
       collar_id: collarId,
-      actual_start: dayjs(actual_start).format(formatTime),
+      attachment_start: dayjs(attachment_start).format(formatTime),
       data_life_start: dayjs(data_life_start).format(formatTime),
     }
     onSave(body);

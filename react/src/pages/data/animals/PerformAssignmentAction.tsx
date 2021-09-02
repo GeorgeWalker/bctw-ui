@@ -108,10 +108,10 @@ export default function PerformAssignmentAction({
   };
 
   const handleConfirmRemoveDevice = (): void => {
-    const { actual_end, data_life_end } = dli;
+    const { attachment_end, data_life_end } = dli;
     const body: IRemoveDeviceProps = {
       assignment_id: current_attachment.assignment_id,
-      actual_end: dayjs(actual_end).format(formatTime),
+      attachment_end: dayjs(attachment_end).format(formatTime),
       data_life_end: dayjs(data_life_end).format(formatTime),
     }
     saveRemoveDevice(body);
