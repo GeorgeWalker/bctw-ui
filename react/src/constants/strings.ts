@@ -121,6 +121,10 @@ const UserAlertStrings = {
   mortalityFormTitle: 'Mortality Event',
 }
 
+const DataLifeStrings = {
+  editWarning: 'Warning: data life fields can only be modified once'
+}
+
 export {
   CodeStrings,
   CollarStrings,
@@ -132,4 +136,5 @@ export {
   UserAlertStrings,
   WorkflowStrings,
   ImportSteps,
+  DataLifeStrings,
 }

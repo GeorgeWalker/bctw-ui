@@ -3,19 +3,25 @@ import DayjsUtils from '@date-io/dayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import { MuiPickersUtilsProvider, DateTimePicker } from '@material-ui/pickers';
 import { formatTime} from 'utils/time';
-import { DateInputProps, DateTimeChangeOutput } from 'components/form/Date';
+import { DateInputProps } from 'components/form/Date';
 
-type DateTimeInputProps = DateInputProps & {
-  changeHandler: (v: DateTimeChangeOutput) => void;
+export type DTimeChangeOutput = Record<string, Dayjs>;
+
+type DateTimeInputProps = Omit<DateInputProps, 'defaultValue' | 'minDate' | 'maxDate'> & {
+  changeHandler: (v: DTimeChangeOutput) => void;
+  defaultValue: Dayjs;
+  minDate?: Dayjs;
+  maxDate?: Dayjs;
 };
 
 export default function DateTimeInput(props: DateTimeInputProps): JSX.Element {
   const { defaultValue, label, changeHandler, propName, minDate, maxDate } = props;
-  const [selectedTime, setSelectedTime] = useState<Dayjs>(defaultValue ? dayjs(defaultValue) : undefined);
+  // console.log(defaultValue)
+  const [selectedTime, setSelectedTime] = useState<Dayjs>(defaultValue?.isValid() ? defaultValue : null);
 
-  const handleChangeTime = (date: Dayjs): void => {
-    setSelectedTime(date);
-    const t = {[propName]: date.format(formatTime)};
+  const handleChangeTime = (d: Dayjs): void => {
+    setSelectedTime(d);
+    const t = {[propName]: d};
     changeHandler(t);
   };
 

@@ -1,8 +1,9 @@
 import { createUrl } from 'api/api_helpers';
 import { plainToClass } from 'class-transformer';
-import { ICollarHistory, CollarHistory, IAttachDeviceProps, IRemoveDeviceProps, IChangeDataLifeProps } from 'types/collar_history';
+import { ICollarHistory, CollarHistory, IAttachDeviceProps, IRemoveDeviceProps } from 'types/collar_history';
 import { attachDeviceEndpoint, getCollarAssignmentHistoryEndpoint, removeDeviceEndpoint, updateDatalifeEndpoint } from 'api/api_endpoint_urls';
 import { ApiProps } from 'api/api_interfaces';
+import { IChangeDataLifeProps } from 'types/data_life';
 
 /**
  * api for animal/device relationship endpoints
@@ -37,7 +38,7 @@ export const attachmentApi = (props: ApiProps) => {
 
   const updateAttachmentDataLife = async (body: IChangeDataLifeProps): Promise<CollarHistory> => {
     const url = createUrl({ api: updateDatalifeEndpoint});
-    // console.log(`posting ${link}: ${JSON.stringify(body.data)}`);
+    // console.log(`posting ${url}: ${JSON.stringify(body)}`);
     const { data } = await api.post(url, body);
     return plainToClass(CollarHistory, data);
   }

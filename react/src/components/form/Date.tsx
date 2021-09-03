@@ -5,8 +5,9 @@ import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
 import { formatDay } from 'utils/time';
 import { StandardTextFieldProps } from '@material-ui/core/TextField';
 
-export type DateTimeChangeOutput = Record<string, string>;
+type DateTimeChangeOutput = Record<string, string>;
 
+// todo: convert to Dayjs
 export type DateInputProps = StandardTextFieldProps & {
   propName: string;
   label: string;

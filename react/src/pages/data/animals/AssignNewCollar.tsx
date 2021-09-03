@@ -2,14 +2,13 @@ import { useState } from 'react';
 import Button from 'components/form/Button';
 import Modal from 'components/modal/Modal';
 import DataTable from 'components/table/DataTable';
-import { collarPropsToDisplay, Collar, eCollarAssignedStatus } from 'types/collar';
+import { Collar, eCollarAssignedStatus } from 'types/collar';
 import { CritterStrings as CS } from 'constants/strings';
 import { useTelemetryApi } from 'hooks/useTelemetryApi';
 import DataLifeInputForm from 'components/form/DataLifeInputForm';
-import { DataLifeInput, IAttachDeviceProps } from 'types/collar_history';
+import { IAttachDeviceProps } from 'types/collar_history';
 import { Animal } from 'types/animal';
-import dayjs from 'dayjs';
-import { formatTime } from 'utils/time';
+import { DataLifeInput } from 'types/data_life';
 
 type IAssignNewCollarModal = Pick<Animal, 'critter_id'> & {
   show: boolean;
@@ -20,6 +19,7 @@ type IAssignNewCollarModal = Pick<Animal, 'critter_id'> & {
 
 /**
  * Displays devices that can be assigned to this animal
+ * accessed from @function PerformAssignmentAction component
  * @param {onSave} - parent component {PerformAssignment} handles this.
  * collar row must be selected in order to enable the save button
  */
@@ -32,12 +32,11 @@ export default function AssignNewCollarModal({ critter_id, dli, onClose, show, o
   const handleSelectDevice = (row: Collar): void => setCollarId(row.collar_id);
 
   const handleSave = (): void => {
-    const { attachment_start, data_life_start } = DLInput;
     const body: IAttachDeviceProps = {
       critter_id,
       collar_id: collarId,
-      attachment_start: dayjs(attachment_start).format(formatTime),
-      data_life_start: dayjs(data_life_start).format(formatTime),
+      // formats the datetime properties
+      ...dli.toPartialAttachDeviceJSON()
     }
     onSave(body);
   }
@@ -46,7 +45,7 @@ export default function AssignNewCollarModal({ critter_id, dli, onClose, show, o
     <>
       <Modal open={show} handleClose={onClose}>
         <DataTable
-          headers={collarPropsToDisplay}
+          headers={Collar.propsToDisplay}
           title={CS.collarAssignmentTitle}
           queryProps={{ query: bctwApi.useCollarType, param: eCollarAssignedStatus.Available }}
           onSelect={handleSelectDevice}

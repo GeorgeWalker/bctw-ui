@@ -29,6 +29,7 @@ import { eUDFType, IUDF, IUDFInput } from 'types/udf';
 import { ITelemetryPoint, ITelemetryLine } from 'types/map';
 import MortalityEvent from 'types/mortality_event';
 import { eCritterPermission, IExecutePermissionRequest, IPermissionRequestInput, IUserCritterPermissionInput, PermissionRequest } from 'types/permission';
+import { IChangeDataLifeProps } from 'types/data_life';
 
 /**
  * Returns an instance of axios with baseURL set.
@@ -319,11 +320,10 @@ export const useTelemetryApi = () => {
     useMutation<CollarHistory, AxiosError, IRemoveDeviceProps>((link) => attachmentApi.removeDevice(link), config);
 
   /** updates the data life of an animal/device attachment */
-  // todo:
-  // const useMutateUpdateDataLife = (
-  //   config: UseMutationOptions<CollarHistory, AxiosError, IRemoveDeviceProps>
-  // ): UseMutationResult =>
-  //   useMutation<CollarHistory, AxiosError, IRemoveDeviceProps>((link) => attachmentApi.removeDevice(link), config);
+  const useMutateEditDataLife = (
+    config: UseMutationOptions<CollarHistory, AxiosError, IChangeDataLifeProps>
+  ): UseMutationResult =>
+    useMutation<CollarHistory, AxiosError, IChangeDataLifeProps>((dl) => attachmentApi.updateAttachmentDataLife(dl), config);
 
   /** upload a single .csv file to add or update codes/code headers, critters, or collars */
   const useMutateBulkCsv = <T>(
@@ -407,6 +407,7 @@ export const useTelemetryApi = () => {
     useMutateCritter,
     useMutateAttachDevice,
     useMutateRemoveDevice,
+    useMutateEditDataLife,
     useMutateGrantCritterAccess,
     useMutateUDF,
     useMutateUser,

@@ -5,16 +5,16 @@ import DataLifeInputForm from 'components/form/DataLifeInputForm';
 import ConfirmModal from 'components/modal/ConfirmModal';
 import { CritterStrings as CS } from 'constants/strings';
 import { useResponseDispatch } from 'contexts/ApiResponseContext';
-import dayjs from 'dayjs';
 import useDidMountEffect from 'hooks/useDidMountEffect';
 import { useTelemetryApi } from 'hooks/useTelemetryApi';
-import ShowCollarAssignModal from 'pages/data/animals/AssignNewCollar';
+import AssignNewCollarModal from 'pages/data/animals/AssignNewCollar';
 import { useState } from 'react';
 import { useQueryClient } from 'react-query';
-import { CollarHistory, DataLifeInput, IRemoveDeviceProps } from 'types/collar_history';
+import { CollarHistory, IRemoveDeviceProps } from 'types/collar_history';
+import { DataLifeInput } from 'types/data_life';
 import { canRemoveDeviceFromAnimal } from 'types/permission';
 import { formatAxiosError } from 'utils/errors';
-import { formatTime } from 'utils/time';
+
 import { IAssignmentHistoryPageProps } from './AssignmentHistory';
 
 type IPerformAssignmentActionPageProps = Pick<IAssignmentHistoryPageProps, 'permission_type' | 'critter_id'> & {
@@ -65,20 +65,27 @@ export default function PerformAssignmentAction({
   }, [current_attachment]);
 
   // post response handlers
-  const onSuccess = (data: CollarHistory): void => {
+  const onAttachSuccess = (_data: CollarHistory): void => {
     updateStatus({
       severity: 'success',
-      message: `device ${data.collar_id} successfully ${isLink ? 'linked to' : 'removed from'} critter`
+      message: 'device successfully attached to animal'
     });
     // todo: if device is attached ...update state to indicate that the device can only be removed
     setIsLink((o) => !o);
-  };
+    closeModals();
+  }
+  
+  const onRemoveSuccess = (_data: CollarHistory): void => updateStatus({
+    severity: 'success',
+    message: 'device successfully removed from animal'
+  });
 
-  const onError = (error: AxiosError): void =>
+  const onError = (error: AxiosError): void => {
     updateStatus({
       severity: 'error',
-      message: `error ${isLink ? 'linking' : 'removing'} device: ${formatAxiosError(error)}`
+      message: `error ${isLink ? 'attaching' : 'removing'} device: ${formatAxiosError(error)}`
     });
+  }
 
   // 
   const updateStatus = (notif: INotificationMessage): void => {
@@ -88,14 +95,15 @@ export default function PerformAssignmentAction({
 
   // force the collar history, current assigned/unassigned critter pages to refetch
   const updateCollarHistory = async (): Promise<void> => {
+    console.log('invalidating collar assignment history queries');
     queryClient.invalidateQueries('collarAssignmentHistory');
     queryClient.invalidateQueries('critters_unassigned');
     queryClient.invalidateQueries('critters_assigned');
   };
 
   // setup mutations to save the device attachment status
-  const { mutateAsync: saveAttachDevice } = bctwApi.useMutateAttachDevice({ onSuccess, onError });
-  const { mutateAsync: saveRemoveDevice } = bctwApi.useMutateRemoveDevice({ onSuccess, onError });
+  const { mutateAsync: saveAttachDevice } = bctwApi.useMutateAttachDevice({ onSuccess: onAttachSuccess, onError });
+  const { mutateAsync: saveRemoveDevice } = bctwApi.useMutateRemoveDevice({ onSuccess: onRemoveSuccess, onError });
 
   /* if there is a collar attached and user clicks the remove button, show the confirmation window
     otherwise, show the list of devices the user has access to
@@ -108,11 +116,9 @@ export default function PerformAssignmentAction({
   };
 
   const handleConfirmRemoveDevice = (): void => {
-    const { attachment_end, data_life_end } = dli;
     const body: IRemoveDeviceProps = {
       assignment_id: current_attachment.assignment_id,
-      attachment_end: dayjs(attachment_end).format(formatTime),
-      data_life_end: dayjs(data_life_end).format(formatTime),
+      ...dli.toRemoveDeviceJSON()
     }
     saveRemoveDevice(body);
   }
@@ -120,7 +126,7 @@ export default function PerformAssignmentAction({
   // componenet passed to the confirm device removal as the modal body.
   const ConfirmRemoval = (
     <>
-      <p>{CS.collarRemovalText(current_attachment.device_id, current_attachment.device_make)}</p>
+      <p>{CS.collarRemovalText(current_attachment?.device_id, current_attachment?.device_make)}</p>
       <DataLifeInputForm dli={dli} showEnd={true} showStart={false} />
     </>
   )
@@ -134,16 +140,16 @@ export default function PerformAssignmentAction({
         message={ConfirmRemoval}
         title={CS.collarRemovalTitle}
       />
-      <ShowCollarAssignModal
+      <AssignNewCollarModal
         onSave={saveAttachDevice}
         critter_id={critter_id}
         show={showAvailableModal}
         onClose={closeModals}
         dli={dli}
       />
-      <p>permission: {permission_type}</p>
+      {/* <p>permission: {permission_type}</p> */}
       <Button disabled={!canEdit} onClick={handleClickShowModal}>
-        {isLink ? 'remove device' : 'assign device'}
+        {isLink ? 'Remove Device' : 'Assign Device'}
       </Button>
     </>
   );
