@@ -6,39 +6,36 @@ import { DataLifeInput } from 'types/data_life';
 import { Dayjs } from 'dayjs';
 
 /**
- * @param disableEditActual flag to always disable the attachment start/end fields
- * @param showStart
- * @param showEnd
+ * @param dli instance of @type {DataLifeIinput} 
+ * @param disableEditActual always disable the attachment start/end fields
+ * @param enableEditStart @param enableEditEndenable whether or not to enable the start / end fields
+ * @param disableDLStart @param disableDLEnd explicity disable only the data life fields
  * @param onChange optional change handler when a datetime is modified
- * @param dli instance of @class DataLifeIinput 
  */
 type DataLifeInputProps = {
-  disableEditActual?: boolean;
-  showStart: boolean;
-  showEnd: boolean;
   dli: DataLifeInput;
+  enableEditStart: boolean;
+  enableEditEnd: boolean;
+
+  disableDLStart?: boolean;
+  disableDLEnd?: boolean;
+  disableEditActual?: boolean;
   onChange?: (d: DTimeChangeOutput) => void;
 };
 
+// todo: doc
 const getFirstKey = (d: DTimeChangeOutput): string => Object.keys(d)[0];
 const getFirstValue = (d: DTimeChangeOutput): Dayjs => Object.values(d)[0];
 
 /**
  * todo: time validation if same date?
- * todo: admin always enable DL edit
  */
 export default function DataLifeInputForm(props: DataLifeInputProps): JSX.Element {
-  const { dli, disableEditActual, showStart, showEnd, onChange } = props;
+  const { dli, disableEditActual, enableEditStart, enableEditEnd, onChange, disableDLEnd, disableDLStart } = props;
   const [minDate, setMinDate] = useState<Dayjs>(dli.attachment_start);
   const [maxDate, setMaxDate] = useState<Dayjs>(dli.attachment_end);
 
   const [isModified, setIsModified] = useState<boolean>(false);
-
-  // on initial load, determine if DL timestamps have been changed
-  // fixme:
-  // const canEditDLStart = dli.canChangeDLStart;
-  // const canEditDLEnd = dli.canChangeDLEnd;
-  // console.log(dli, canEditDLStart, canEditDLEnd)
 
   const handleDateOrTimeChange = (d): void => {
     const k = getFirstKey(d);
@@ -61,7 +58,7 @@ export default function DataLifeInputForm(props: DataLifeInputProps): JSX.Elemen
 
   return (
     <Box paddingBottom={2}>
-      {/* if data life has been modified - show a warnning */}
+      {/* if data life has been modified - show a warning */}
       <Box height={35} display='flex' justifyContent={'center'}>
         {isModified ? (<Typography color={'error'}>{DataLifeStrings.editWarning}</Typography>) : null}
       </Box>
@@ -69,11 +66,10 @@ export default function DataLifeInputForm(props: DataLifeInputProps): JSX.Elemen
         {/* attachment start field */}
         <DateTimeInput
           propName='attachment_start'
-          // changeHandler={handleDateOrTimeChange}
           changeHandler={handleDateOrTimeChange}
-          label='Actual Start'
+          label='Attachment Start'
           defaultValue={dli.attachment_start}
-          disabled={!showStart || disableEditActual}
+          disabled={!enableEditStart|| disableEditActual}
         />
         <Box component={'span'} m={1} />
         {/* data life start field */}
@@ -82,19 +78,8 @@ export default function DataLifeInputForm(props: DataLifeInputProps): JSX.Elemen
           changeHandler={handleDateOrTimeChange}
           label='Data Life Start'
           defaultValue={dli.data_life_start}
-          // disabled={!showStart || !canEditDLStart}
-          disabled={!showStart}
+          disabled={!enableEditStart || disableDLStart}
           minDate={minDate}
-        />
-      </Box>
-      <Box>
-        {/* attachment end field */}
-        <DateTimeInput
-          propName='attachment_end'
-          changeHandler={handleDateOrTimeChange}
-          label='Actual End'
-          defaultValue={dli.attachment_end}
-          disabled={!showEnd || disableEditActual}
         />
         <Box component={'span'} m={1} />
         {/* data life end field */}
@@ -103,9 +88,17 @@ export default function DataLifeInputForm(props: DataLifeInputProps): JSX.Elemen
           changeHandler={handleDateOrTimeChange}
           label='Data Life End'
           defaultValue={dli.data_life_end}
-          // disabled={!showEnd || !canEditDLEnd}
-          disabled={!showEnd}
+          disabled={!enableEditEnd || disableDLEnd}
           maxDate={maxDate}
+        />
+        <Box component={'span'} m={1} />
+        {/* attachment end field */}
+        <DateTimeInput
+          propName='attachment_end'
+          changeHandler={handleDateOrTimeChange}
+          label='Attachment End'
+          defaultValue={dli.attachment_end}
+          disabled={!enableEditEnd|| disableEditActual}
         />
       </Box>
     </Box>

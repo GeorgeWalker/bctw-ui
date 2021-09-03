@@ -4,6 +4,7 @@ import { Type, Expose } from 'class-transformer';
 import dayjs from 'dayjs';
 import { columnToHeader } from 'utils/common_helpers';
 import { IDataLifeStartProps, IDataLifeEndProps } from './data_life';
+import { isDev } from 'api/api_helpers';
 
 
 // passed to the API when attaching a device to an animal
@@ -52,7 +53,11 @@ export class CollarHistory extends BCTWBase implements ICollarHistory {
   // fixme: split these classes?
   // type safe properties to display in tables
   static get propsToDisplay(): CollarProps[] {
-    return ['assignment_id', 'device_id', 'device_make', 'attachment_start', 'valid_from', 'attachment_end', 'valid_to'];
+    const props: CollarProps[] = ['device_id', 'device_make', 'attachment_start', 'valid_from', 'valid_to', 'attachment_end'];
+    if (isDev()) {
+      props.unshift('assignment_id');
+    }
+    return props;
   }
 
   formatPropAsHeader(str: keyof this): string {

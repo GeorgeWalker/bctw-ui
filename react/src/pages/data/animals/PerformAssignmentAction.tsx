@@ -8,7 +8,7 @@ import { useResponseDispatch } from 'contexts/ApiResponseContext';
 import useDidMountEffect from 'hooks/useDidMountEffect';
 import { useTelemetryApi } from 'hooks/useTelemetryApi';
 import AssignNewCollarModal from 'pages/data/animals/AssignNewCollar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQueryClient } from 'react-query';
 import { CollarHistory, IRemoveDeviceProps } from 'types/collar_history';
 import { DataLifeInput } from 'types/data_life';
@@ -40,8 +40,12 @@ export default function PerformAssignmentAction({
   // is a device being attached or removed?
   const [isLink, setIsLink] = useState<boolean>(!!current_attachment?.collar_id);
   const [canEdit, setCanEdit] = useState<boolean>(false);
-  // parent data life state. passed to both modals for attaching/removing devices
-  const [dli, setDli] = useState<DataLifeInput>(new DataLifeInput())
+  /**
+   * data life state. passed to both modals for attaching/removing devices
+   * if there is no attachment, pass true as second param of DataLifeInput constructor to 
+   * default the start datetimes to now
+   */
+  const [dli, setDli] = useState<DataLifeInput>(new DataLifeInput(null, true));
 
   /**
    * users with admin/owner permission can attach/unattach devices
@@ -61,8 +65,13 @@ export default function PerformAssignmentAction({
     // console.log(`perm: ${permission_type}, islink : ${isLink}`);
     setIsLink(!!current_attachment?.collar_id);
     setDli(new DataLifeInput(current_attachment));
-    setCanEdit(determineButtonState());
   }, [current_attachment]);
+
+  // for critters with no device history, attachment effect above will not occur,
+  // so update the assignment button status regardless
+  useEffect(() => {
+    setCanEdit(determineButtonState());
+  })
 
   // post response handlers
   const onAttachSuccess = (_data: CollarHistory): void => {
@@ -127,7 +136,7 @@ export default function PerformAssignmentAction({
   const ConfirmRemoval = (
     <>
       <p>{CS.collarRemovalText(current_attachment?.device_id, current_attachment?.device_make)}</p>
-      <DataLifeInputForm dli={dli} showEnd={true} showStart={false} />
+      <DataLifeInputForm dli={dli} enableEditEnd={true} enableEditStart={false} />
     </>
   )
 

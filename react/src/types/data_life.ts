@@ -4,7 +4,7 @@ import { CollarHistory, IAttachDeviceProps, IRemoveDeviceProps } from './collar_
 
 /**
  * the attachment attachment start and data life start date time props
- * the inner bounding data_life_start should be after the actual start
+ * the inner bounding data_life_start should be after the attachment_start
  */
 export interface IDataLifeStartProps {
   attachment_start: Dayjs | string; 
@@ -12,7 +12,7 @@ export interface IDataLifeStartProps {
 }
 /**
  * the attachment end and data life end date time props
- * the inner bounding data_life_end should be before the actual end
+ * the inner bounding data_life_end should be before the attachment_end
  */
 export interface IDataLifeEndProps {
   attachment_end?: Dayjs | string;
@@ -27,6 +27,9 @@ export interface IChangeDataLifeProps extends
 
 /**
  * used in the Data Life input component
+ * fixme: taking @type {CollarHistory} in the constructor is a convulated 
+ * way of handling this type. Maybe extend the collarhistory class and 
+ * figure out a way to deal with how the fields are valid_from vs. data_life_start etc.
  */
 export class DataLifeInput implements IDataLifeStartProps, IDataLifeEndProps {
   attachment_end: Dayjs;
@@ -34,15 +37,20 @@ export class DataLifeInput implements IDataLifeStartProps, IDataLifeEndProps {
   data_life_end: Dayjs;
   data_life_start: Dayjs;
 
-  constructor(history?: CollarHistory) {
-    // const d = dayjs();
-    this.attachment_start = history ? dayjs(history.attachment_start) : null;
+  /** 
+   * if @param history is provided, default timestamps to it's values
+   * otherwise, optionally pass @param defaultStart to default start timestamps to now
+   * ex. used when assigning a new device
+  */
+  constructor(history?: CollarHistory, defaultStart = false) {
+    const d = dayjs();
+    this.attachment_start = history ? dayjs(history.attachment_start) : defaultStart ? d : null;
     this.attachment_end = history ? dayjs(history.attachment_end) : null;
-    this.data_life_start = history ? dayjs(history.valid_from) : null;
+    this.data_life_start = history ? dayjs(history.valid_from) : defaultStart ? d : null;
     this.data_life_end = history ? dayjs(history.valid_to) : null;
-    // console.log('created new DataLifeInput', JSON.stringify(this));
   }
 
+  // data life properties can only be changed if user is an admin or they haven't been modified before
   get canChangeDLStart(): boolean {
     if (isDayjs(this.data_life_start) && isDayjs(this.attachment_start)) {
       return this.data_life_start.isSame(this.attachment_start);
@@ -57,6 +65,7 @@ export class DataLifeInput implements IDataLifeStartProps, IDataLifeEndProps {
     return true;
   }
 
+  // must get assignment_id elsewhere
   toRemoveDeviceJSON(): Omit<IRemoveDeviceProps, 'assignment_id'> {
     return {
       attachment_end: this.attachment_end.format(formatTime),
@@ -72,7 +81,7 @@ export class DataLifeInput implements IDataLifeStartProps, IDataLifeEndProps {
     }
   }
 
-  // must get assignment id separately
+  // must get assignment id elsewhere
   toPartialEditDatalifeJSON(): Omit<IChangeDataLifeProps, 'assignment_id'> {
     return {
       data_life_start: this.data_life_start.format(formatTime),

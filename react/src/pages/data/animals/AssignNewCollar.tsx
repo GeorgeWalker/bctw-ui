@@ -50,7 +50,8 @@ export default function AssignNewCollarModal({ critter_id, dli, onClose, show, o
           queryProps={{ query: bctwApi.useCollarType, param: eCollarAssignedStatus.Available }}
           onSelect={handleSelectDevice}
         />
-        <DataLifeInputForm dli={DLInput} showStart={true} showEnd={false} />
+        {/* disable editing of end of the attachment when attaching the device */}
+        <DataLifeInputForm dli={DLInput} enableEditStart={true} enableEditEnd={false} />
         <Button disabled={collarId === ''} onClick={handleSave}>
           {CS.assignCollarBtnText}
         </Button>

@@ -4,6 +4,7 @@ import { ICollarHistory, CollarHistory, IAttachDeviceProps, IRemoveDeviceProps }
 import { attachDeviceEndpoint, getCollarAssignmentHistoryEndpoint, removeDeviceEndpoint, updateDatalifeEndpoint } from 'api/api_endpoint_urls';
 import { ApiProps } from 'api/api_interfaces';
 import { IChangeDataLifeProps } from 'types/data_life';
+import { useQueryClient } from 'react-query';
 
 /**
  * api for animal/device relationship endpoints
@@ -11,6 +12,12 @@ import { IChangeDataLifeProps } from 'types/data_life';
 
 export const attachmentApi = (props: ApiProps) => {
   const { api } = props;
+  const queryClient = useQueryClient();
+
+  // todo: test
+  const invalidateQueries = (): void => {
+    queryClient.invalidateQueries('collarAssignmentHistory');
+  }
 
   /** given a critter_id, retrieve it's device attachment history */
   const getCollarAssignmentHistory = async (critterId: number, page = 1): Promise<CollarHistory[]> => {
@@ -40,6 +47,7 @@ export const attachmentApi = (props: ApiProps) => {
     const url = createUrl({ api: updateDatalifeEndpoint});
     // console.log(`posting ${url}: ${JSON.stringify(body)}`);
     const { data } = await api.post(url, body);
+    invalidateQueries();
     return plainToClass(CollarHistory, data);
   }
 
