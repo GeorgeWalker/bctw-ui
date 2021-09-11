@@ -33,7 +33,7 @@ export default function TextField(props: ITextInputProps): JSX.Element {
     callParentHandler();
   }, [val, err])
 
-  const handleChange = (event): void => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const target = event.target.value;
     setErr('');
     setVal(target);

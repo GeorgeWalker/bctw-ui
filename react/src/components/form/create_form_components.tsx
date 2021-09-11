@@ -28,7 +28,7 @@ type CreateInputProps<T> = CreateInputBaseProps<T> & {
 
 // text and number field handler
 function CreateEditTextField<T>(props: CreateInputProps<T>): JSX.Element {
-  const { prop, type, value } = props;
+  const { prop, value } = props;
   // note: passing 'value' will cause the component to consider itself 'controlled'
   const propsToPass = removeProps(props, ['value', 'errorMessage', 'codeName']);
   const propName = prop as string;
@@ -45,7 +45,6 @@ function CreateEditTextField<T>(props: CreateInputProps<T>): JSX.Element {
       key={`input-text-${propName}`}
       propName={propName}
       defaultValue={value as string}
-      type={type}
       changeHandler={props.handleChange}
       error={!!props.errorMessage ?? false}
       helperText={props.errorMessage}
@@ -59,7 +58,7 @@ function CreateEditDateField<T>({ prop, value, handleChange, label, disabled }: 
   return (
     <DateInput
       propName={prop as string}
-      label={label}
+      label={label ?? ''}
       defaultValue={value as Date}
       changeHandler={handleChange}
       disabled={disabled}
@@ -73,7 +72,7 @@ function CreateEditDateTimeField<T>({ prop, value, handleChange, label, disabled
   return (
     <DateTimeInput
       propName={prop as string}
-      label={label}
+      label={label ?? ''}
       defaultValue={dayjs(value as Date)}
       changeHandler={handleChange}
       disabled={disabled}
@@ -88,7 +87,7 @@ function CreateEditCheckboxField<T>({ prop, value, handleChange, label, disabled
     <CheckBox
       changeHandler={handleChange}
       initialValue={value as boolean}
-      label={label}
+      label={label ?? ''}
       propName={prop as string}
       disabled={disabled}
       key={`input-check-${prop}`}

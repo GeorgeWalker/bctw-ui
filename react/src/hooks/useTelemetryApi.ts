@@ -14,7 +14,7 @@ import { useMutation, UseMutationOptions, UseMutationResult, useQuery, UseQueryR
 import { Animal, AttachedAnimal, eCritterFetchType } from 'types/animal';
 import { ICode, ICodeHeader } from 'types/code';
 import { Collar, eCollarAssignedStatus } from 'types/collar';
-import { CollarHistory, IAttachDeviceProps, IRemoveDeviceProps } from 'types/collar_history';
+import { CollarHistory, AttachDeviceInput, RemoveDeviceInput} from 'types/collar_history';
 import { IKeyCloakSessionInfo, IUserCritterAccess, User, UserCritterAccess } from 'types/user';
 
 import {
@@ -32,6 +32,7 @@ import { eCritterPermission, IExecutePermissionRequest, IPermissionRequestInput,
 import { IChangeDataLifeProps } from 'types/data_life';
 
 /**
+ * fixme: EXTREME boilerplate
  * Returns an instance of axios with baseURL set.
  * @return {AxiosInstance}
  */
@@ -307,15 +308,15 @@ export const useTelemetryApi = () => {
 
   /** attaches a device from an animal */
   const useMutateAttachDevice = (
-    config: UseMutationOptions<CollarHistory, AxiosError, IAttachDeviceProps>
-  ): UseMutationResult =>
-    useMutation<CollarHistory, AxiosError, IAttachDeviceProps>((link) => attachmentApi.attachDevice(link), config);
+    config: UseMutationOptions<CollarHistory, AxiosError, AttachDeviceInput>
+  ): UseMutationResult<CollarHistory, AxiosError, AttachDeviceInput> =>
+    useMutation<CollarHistory, AxiosError, AttachDeviceInput>((link) => attachmentApi.attachDevice(link), config);
 
   /** removes a device from an animal */
   const useMutateRemoveDevice = (
-    config: UseMutationOptions<CollarHistory, AxiosError, IRemoveDeviceProps>
-  ): UseMutationResult =>
-    useMutation<CollarHistory, AxiosError, IRemoveDeviceProps>((link) => attachmentApi.removeDevice(link), config);
+    config: UseMutationOptions<CollarHistory, AxiosError, RemoveDeviceInput>
+  ): UseMutationResult<CollarHistory, AxiosError, RemoveDeviceInput> =>
+    useMutation<CollarHistory, AxiosError, RemoveDeviceInput>((link) => attachmentApi.removeDevice(link), config);
 
   /** updates the data life of an animal/device attachment */
   const useMutateEditDataLife = (
@@ -338,7 +339,7 @@ export const useTelemetryApi = () => {
   /** grant or remove permissions to a user to animals */
   const useMutateGrantCritterAccess = (
     config: UseMutationOptions<IBulkUploadResults<IGrantCritterAccessResults>, AxiosError, IUserCritterPermissionInput>
-  ): UseMutationResult =>
+  ): UseMutationResult<IBulkUploadResults<IGrantCritterAccessResults>, AxiosError, IUserCritterPermissionInput> =>
     useMutation<IBulkUploadResults<IGrantCritterAccessResults>, AxiosError, IUserCritterPermissionInput>(
       (body) => permissionApi.grantCritterAccessToUser(body),
       config

@@ -8,18 +8,21 @@ import { isDev } from 'api/api_helpers';
 import { Code } from 'types/code';
 import { Animal } from './animal';
 
-// passed to the API when attaching a device to an animal
-export interface IAttachDeviceProps extends IDataLifeStartProps, IDataLifeEndProps,
-  Pick<Animal, 'critter_id'>, Pick<Collar, 'collar_id'> { }
-
-export interface ICollarHistory extends
-  Pick<Collar, 'collar_id' | 'device_id' | 'device_make' | 'frequency'>, DataLife,
+export interface ICollarHistory
+  extends Pick<Collar, 'collar_id' | 'device_id' | 'device_make' | 'frequency'>,
+  DataLife,
   Pick<Animal, 'critter_id'> {
   assignment_id: uuid;
 }
 
+// passed to the API when attaching a device to an animal
+export type AttachDeviceInput = Pick<Animal, 'critter_id'> & Pick<Collar, 'collar_id'> &
+{ [Property in keyof IDataLifeStartProps]: string } &
+{ [Property in keyof IDataLifeEndProps]: string };
+
 // passed to the API when removing a device from an animal
-export interface IRemoveDeviceProps extends Required<IDataLifeEndProps>, Pick<ICollarHistory, 'assignment_id'> { }
+export type RemoveDeviceInput = Pick<ICollarHistory, 'assignment_id'> &
+{ [Property in keyof Required<IDataLifeEndProps>]: string };
 
 /**
  * represents an device attachment to an animal.
@@ -31,12 +34,14 @@ export class CollarHistory implements BCTWBaseType<CollarHistory>, ICollarHistor
   device_id: number;
   device_make: Code;
   frequency: number;
-  @Transform(nullToDayjs) data_life_start: Dayjs; 
+  @Transform(nullToDayjs) data_life_start: Dayjs;
   @Transform(nullToDayjs) data_life_end: Dayjs;
   @Transform(nullToDayjs) attachment_start: Dayjs;
   @Transform(nullToDayjs) attachment_end: Dayjs;
 
-  @Expose() get identifier(): string { return 'assignment_id' }
+  @Expose() get identifier(): string {
+    return 'assignment_id';
+  }
 
   toJSON(): CollarHistory {
     return this;
@@ -45,7 +50,14 @@ export class CollarHistory implements BCTWBaseType<CollarHistory>, ICollarHistor
   // note: endpoint for retrieving collar history displays additional collar/animal properties
   // type safe properties to display in tables
   static get propsToDisplay(): (keyof CollarHistory)[] {
-    const props: (keyof CollarHistory)[] = ['device_id', 'device_make', 'attachment_start', 'data_life_start', 'data_life_end', 'attachment_end'];
+    const props: (keyof CollarHistory)[] = [
+      'device_id',
+      'device_make',
+      'attachment_start',
+      'data_life_start',
+      'data_life_end',
+      'attachment_end'
+    ];
     if (isDev()) {
       props.unshift('assignment_id');
     }
@@ -68,7 +80,7 @@ export class CollarHistory implements BCTWBaseType<CollarHistory>, ICollarHistor
 
 /**
  * @returns a boolean indicating if the @param history contains a
- * valid animal/device attachment - if there is a record with a valid_to 
+ * valid animal/device attachment - if there is a record with a valid_to
  * that is null or in the future
  */
 export const hasCollarCurrentlyAssigned = (history: CollarHistory[]): CollarHistory | undefined => {
@@ -80,4 +92,4 @@ export const hasCollarCurrentlyAssigned = (history: CollarHistory[]): CollarHist
     return dayjs().isBefore(h.data_life_end);
   });
   return currentlyAssigned.length ? currentlyAssigned[0] : undefined;
-}
+};

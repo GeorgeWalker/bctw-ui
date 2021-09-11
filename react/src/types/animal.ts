@@ -22,7 +22,7 @@ export interface IAnimalTelemetryBase {
   animal_status: Code;
   capture_date: Dayjs|Date;
   collective_unit: string; // fixme: what is this
-  map_colour: Code;
+  map_colour?: Code;
   species: Code;
   population_unit: Code;
   wlh_id: string;
@@ -104,7 +104,7 @@ export class Animal implements BCTWBaseType<Animal>, IAnimal {
   juvenile_at_heel: Code;
   @Transform((value) => value || -1, transformOpt) juvenile_at_heel_count: number;
   life_stage: Code;
-  map_colour: Code;
+  map_colour?: Code;
   mortality_comment: string;
   @Transform(nullToDayjs) mortality_date: Dayjs;
   @Transform(nullToNumber, transformOpt) mortality_latitude: number;

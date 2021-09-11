@@ -2,27 +2,29 @@ import { useState } from 'react';
 import DayjsUtils from '@date-io/dayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import { MuiPickersUtilsProvider, DateTimePicker } from '@material-ui/pickers';
-import { formatTime} from 'utils/time';
+import { formatTime } from 'utils/time';
 import { DateInputProps } from 'components/form/Date';
+import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
 
 export type DTimeChangeOutput = Record<string, Dayjs>;
 
-type DateTimeInputProps = Omit<DateInputProps, 'defaultValue' | 'minDate' | 'maxDate'> & {
-  // fixme: why does typing this break things
-  // fixme: alignment / size 
+type DateTimeInputProps = Omit<DateInputProps, 'changeHandler' | 'defaultValue' | 'minDate' | 'maxDate'> & {
   changeHandler: (v: DTimeChangeOutput) => void;
   defaultValue: Dayjs;
   minDate?: Dayjs;
   maxDate?: Dayjs;
 };
 
+/**
+ * fixme: alignment / size
+ */
 export default function DateTimeInput(props: DateTimeInputProps): JSX.Element {
   const { required, defaultValue, label, changeHandler, propName, minDate, maxDate } = props;
-  const [selectedTime, setSelectedTime] = useState<Dayjs>(defaultValue?.isValid() ? defaultValue : null);
+  const [selectedTime, setSelectedTime] = useState<Dayjs | null>(defaultValue?.isValid() ? defaultValue : null);
 
   const handleChangeTime = (d: Dayjs): void => {
     setSelectedTime(d);
-    const t = {[propName]: d};
+    const t = { [propName]: d };
     changeHandler(t);
   };
 
@@ -38,7 +40,7 @@ export default function DateTimeInput(props: DateTimeInputProps): JSX.Element {
         margin='normal'
         label={label}
         value={selectedTime}
-        onChange={handleChangeTime}
+        onChange={(d: MaterialUiPickersDate): void => handleChangeTime(d as Dayjs)}
         minDate={minDate}
         maxDate={maxDate}
         required={required}
@@ -46,4 +48,3 @@ export default function DateTimeInput(props: DateTimeInputProps): JSX.Element {
     </MuiPickersUtilsProvider>
   );
 }
-

@@ -1,6 +1,6 @@
 import dayjs, {Dayjs, isDayjs} from 'dayjs';
 import { formatTime } from 'utils/time';
-import { CollarHistory, IAttachDeviceProps, IRemoveDeviceProps } from './collar_history';
+import { AttachDeviceInput, CollarHistory, RemoveDeviceInput } from './collar_history';
 
 /**
  * the attachment attachment start and data life start date time props
@@ -47,12 +47,16 @@ export class DataLifeInput implements IDataLifeStartProps, IDataLifeEndProps {
    * ex. used when assigning a new device
   */
   constructor(history?: CollarHistory, defaultStart = false) {
-    // console.log(history)
-    const d = dayjs();
-    this.attachment_start = history ? history.attachment_start : defaultStart ? d : null;
-    this.data_life_start = history ? history.data_life_start : defaultStart ? d : null;
-    this.attachment_end = history ? history.attachment_end : null;
-    this.data_life_end = history ? history.data_life_end: null;
+    if (history) {
+      this.attachment_start = history.attachment_start;
+      this.data_life_start = history.data_life_start;
+      this.attachment_end = history.attachment_end;
+      this.data_life_end = history.data_life_end;
+    } else if (defaultStart) {
+      const d = dayjs();
+      this.attachment_start = d;
+      this.data_life_start = d;
+    }
   }
 
   // data life properties can only be changed if user is an admin or they haven't been modified before
@@ -71,7 +75,7 @@ export class DataLifeInput implements IDataLifeStartProps, IDataLifeEndProps {
   }
 
   // must get assignment_id elsewhere
-  toRemoveDeviceJSON(): Omit<IRemoveDeviceProps, 'assignment_id'> {
+  toRemoveDeviceJSON(): Omit<RemoveDeviceInput, 'assignment_id'> {
     return {
       attachment_end: this.attachment_end.format(formatTime),
       data_life_end: this.data_life_end.format(formatTime),
@@ -79,7 +83,7 @@ export class DataLifeInput implements IDataLifeStartProps, IDataLifeEndProps {
   }
 
   // must provide critter/collar ids separarately
-  toPartialAttachDeviceJSON(): Omit<IAttachDeviceProps, 'collar_id' | 'critter_id'> {
+  toPartialAttachDeviceJSON(): Omit<AttachDeviceInput, 'collar_id' | 'critter_id'> {
     return {
       attachment_start: this.attachment_start.format(formatTime),
       data_life_start: this.data_life_start.format(formatTime),

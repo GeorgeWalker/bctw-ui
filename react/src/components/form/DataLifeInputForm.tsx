@@ -38,9 +38,12 @@ export default function DataLifeInputForm(props: DataLifeInputProps): JSX.Elemen
 
   const [isModified, setIsModified] = useState<boolean>(false);
 
-  const handleDateOrTimeChange = (d): void => {
-    const k = getFirstKey(d);
+  const handleDateOrTimeChange = (d: DTimeChangeOutput): void => {
+    const k = getFirstKey(d) as keyof DataLifeInput;
     const v = getFirstValue(d);
+    if (k === 'canChangeDLEnd' || k === 'canChangeDLStart') {
+      return;
+    }
     dli[k] = v;
     if (k === 'attachment_start') {
       setMinDate(v);

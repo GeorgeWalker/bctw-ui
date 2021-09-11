@@ -12,13 +12,15 @@ type IAutocompleteProps<T extends ISelectMultipleData> = {
 
 export default function MultiSelect<T extends ISelectMultipleData>(props: IAutocompleteProps<T>): JSX.Element {
   const { label, data, triggerReset, changeHandler } = props;
-  const [selected, setSelected] = useState([]);
+  const [selected, setSelected] = useState<T[]>([]);
 
   useEffect(() => {
     setSelected([]);
   }, [triggerReset]);
 
-  const handleChange = (event: React.ChangeEvent<{ unknown }>, value: ISelectMultipleData[]): void => {
+  // documented this way
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  const handleChange = (event: React.ChangeEvent<{}>, value: T[]): void => {
     setSelected(value);
     changeHandler(value as T[]);
   };
@@ -39,7 +41,7 @@ export default function MultiSelect<T extends ISelectMultipleData>(props: IAutoc
             <Chip variant='outlined' key={option.id} label={option.displayLabel} {...getTagProps({ index })} />
           ));
       }}
-      getOptionLabel={(option: ISelectMultipleData): string => option.displayLabel}
+      getOptionLabel={(option: ISelectMultipleData): string => option.displayLabel ?? ''}
       renderInput={(params): JSX.Element => <TextField {...params} label={label} variant='outlined' />}
       onChange={handleChange}
     />
