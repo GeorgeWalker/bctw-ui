@@ -48,11 +48,6 @@ import { ISelectMultipleData } from 'components/form/MultiSelect';
 import { MapStrings } from 'constants/strings';
 import MapLayerToggleControl from 'pages/map/MapLayerToggle';
 
-// note: terrain page deprecated for now
-// import MapIcon from '@material-ui/icons/Map';
-// import LanguageIcon from '@material-ui/icons/Language';
-// import Terrain from '../terrain/TerrainPage';
-
 /**
   there are several forms of state in this page:
     a) the fetched pings/tracks state from the API 
@@ -72,9 +67,6 @@ export default function MapPage(): JSX.Element {
   const bctwApi = useTelemetryApi();
   const mapRef = useRef<L.Map>(null);
 
-  // The flag for which map is showing
-  // const [map3D, setMap3D] = useState(false);
-
   // pings layer state
   const [tracksLayer] = useState<L.GeoJSON<L.Polyline>>(new L.GeoJSON()); // Store Tracks
   const [pingsLayer] = useState<L.GeoJSON<L.Point>>(new L.GeoJSON()); // Store Pings
@@ -88,6 +80,7 @@ export default function MapPage(): JSX.Element {
   const selectedPingsLayer = new L.GeoJSON();
   selectedPingsLayer.options = setupSelectedPings();
 
+  // state to manage the start/end daterange of pings
   const [range, setRange] = useState<MapRange>({
     start: dayjs().subtract(7, 'day').format(formatDay),
     end: getToday()
@@ -100,7 +93,7 @@ export default function MapPage(): JSX.Element {
 
   // modal states - overview, export, udf editing
   const [showOverviewModal, setShowModal] = useState<boolean>(false);
-  const [selectedDetail, setSelectedDetail] = useState<ITelemetryDetail>(null);
+  const [selectedDetail, setSelectedDetail] = useState<ITelemetryDetail>();
   const [overviewType, setOverviewType] = useState<BCTWType>();
   const [showExportModal, setShowExportModal] = useState<boolean>(false);
   const [showUdfEdit, setShowUdfEdit] = useState<boolean>(false);
@@ -119,7 +112,7 @@ export default function MapPage(): JSX.Element {
 
   // store the selection shapes
   const drawnItems = new L.FeatureGroup();
-  const drawnLines = [];
+  const drawnLines: L.Layer[] = [];
 
   // fetch the map data
   const { start, end } = range;
@@ -161,8 +154,8 @@ export default function MapPage(): JSX.Element {
             redrawPings(pings);
             redrawTracks(tracks);
           } else if (onlyLastKnown) {
-            mapRef.current.removeLayer(pingsLayer);
-            mapRef.current.removeLayer(tracksLayer);
+            mapRef?.current?.removeLayer(pingsLayer);
+            mapRef?.current?.removeLayer(tracksLayer);
           }
         } else if (!filters.length) {
           const { latest, other } = splitPings(fetchedPings);
@@ -325,7 +318,7 @@ export default function MapPage(): JSX.Element {
   const handleDeleteLine = (): void => {
     if (drawnLines.length) {
       drawnLines.forEach((l) => {
-        mapRef.current.removeLayer(l);
+        mapRef?.current?.removeLayer(l);
       });
     }
   };
@@ -494,6 +487,9 @@ export default function MapPage(): JSX.Element {
   // fixme: points within drawn polygons are still displayed
   const handleShowLastKnownLocation = (show: boolean): void => {
     setOnlyLastKnown(show);
+    if (!mapRef.current) {
+      return;
+    }
     if (show) {
       mapRef.current.removeLayer(pingsLayer);
       mapRef.current.removeLayer(tracksLayer);
@@ -513,6 +509,9 @@ export default function MapPage(): JSX.Element {
 
   const toggleTracks = (show: boolean): void => {
     const ref = mapRef.current;
+    if (!ref) {
+      return;
+    }
     if (showUnassignedLayers) {
       getTracksLayers().forEach((l) => (show ? ref.addLayer(l) : ref.removeLayer(l)));
       unassignedTracksLayer.bringToBack();
@@ -525,6 +524,9 @@ export default function MapPage(): JSX.Element {
 
   const togglePings = (show: boolean): void => {
     const ref = mapRef.current;
+    if (!ref) {
+      return;
+    }
     const layers = showUnassignedLayers ? getPingLayers() : getPingLayers().slice(0, 2);
     layers.forEach((l) => (show ? ref.addLayer(l) : ref.removeLayer(l)));
   };
@@ -572,6 +574,9 @@ export default function MapPage(): JSX.Element {
     setShowUnassignedLayers(values.includes(MapStrings.assignmentStatusOptionU));
 
     const ref = mapRef.current;
+    if (!ref) {
+      return;
+    }
     const layers = [0, 2].includes(values.length)
       ? [...getAssignedLayers(), ...getUnassignedLayers()]
       : getAssignedLayers();
@@ -595,41 +600,39 @@ export default function MapPage(): JSX.Element {
     }
   };
 
-  // Add the tracks layer
+  /**
+   * 
+   */
+  const addLayer = (layer: L.GeoJSON): void => {
+    if (mapRef?.current) {
+      layer.addTo(mapRef.current);
+    }
+  }
+
+  // Add the tracks layers
   useEffect(() => {
-    tracksLayer.addTo(mapRef.current);
+    addLayer(tracksLayer);
   }, [tracksLayer]);
 
   useEffect(() => {
-    unassignedTracksLayer.addTo(mapRef.current);
+    addLayer(unassignedTracksLayer);
     unassignedTracksLayer.on('add', (l) => l.target.bringToBack());
   }, [unassignedTracksLayer]);
 
   // Add the ping layers
   useEffect(() => {
-    pingsLayer.addTo(mapRef.current);
+    addLayer(pingsLayer);
   }, [pingsLayer]);
 
   useEffect(() => {
-    latestPingsLayer.addTo(mapRef.current);
+    addLayer(latestPingsLayer);
   }, [latestPingsLayer]);
 
   useEffect(() => {
-    unassignedPingsLayer.addTo(mapRef.current);
+    addLayer(unassignedPingsLayer);
   }, [unassignedPingsLayer]);
 
-  // upon 3D -> 2D map, need to re-init
-  /*
-  useDidMountEffect(() => {
-    if (!map3D) {
-      initMap(mapRef, drawnItems, selectedPingsLayer, handleDrawShape, handleDrawLine, handleDeleteLine);
-      togglePings(true);
-      toggleTracks(true);
-    }
-  }, [map3D]);
-  */
-
-  // todo: move this to separate component / wrapper
+  // todo: move this to separate component / wrapper - see Resizable
   // resizable state & handlers
   const [bottomPanelHeight, setBottomPanelHeight] = useState<number>(400);
   const [dragging, setDragging] = useState(false);
@@ -637,7 +640,7 @@ export default function MapPage(): JSX.Element {
   const onMove = (e: React.MouseEvent): void => {
     if (dragging) {
       const mpv = document.getElementById('map-view');
-      const offset = mpv.offsetHeight - e.clientY;
+      const offset = mpv?.offsetHeight ?? 0 - e.clientY;
       // 70 added to base to smooth out the initial 'jump' when drag started
       setBottomPanelHeight(offset + 70);
     }
@@ -651,17 +654,6 @@ export default function MapPage(): JSX.Element {
     }
   };
 
-  // return map3D ? (
-  //   <>
-  //     <Terrain />
-  //     <div
-  //       className={'map-icon map-dimension-btn icon-on'}
-  //       onClick={(): void => setMap3D((o) => !o)}
-  //       title={map3D ? 'Switch to 2D view' : 'Switch to 3D view'}>
-  //       <MapIcon />
-  //     </div>
-  //   </>
-  // ) :
   return (
     <div id={'map-view'} onMouseUp={onUp} onMouseMove={onMove}>
       <MapFilters
@@ -672,7 +664,7 @@ export default function MapPage(): JSX.Element {
         onApplyFilters={handleApplyChangesFromFilterPanel}
         onClickEditUdf={(): void => setShowUdfEdit((o) => !o)}
         // todo: trigger when filter panel transition is completed without timeout
-        onCollapsePanel={(): unknown => setTimeout(() => mapRef.current.invalidateSize(), 200)}
+        onCollapsePanel={(): unknown => setTimeout(() => mapRef?.current?.invalidateSize(), 200)}
         onShowLatestPings={handleShowLastKnownLocation}
         onShowLastFixes={handleShowLast10Fixes}
         onShowUnassignedDevices={handleShowUnassignedDevices}
@@ -685,15 +677,6 @@ export default function MapPage(): JSX.Element {
         <div id='map'>
           <MapLayerToggleControl handleTogglePings={togglePings} handleToggleTracks={toggleTracks} />
         </div>
-
-        {/* The layer switching button */}
-        {/*
-          <div className={'map-icon map-dimension-btn icon-off'}>
-            { onClick={(): void => setMap3D((o) => !o)} }
-            { title={map3D ? 'Switch to 2D map' : 'Switch to 3D view'}> }
-            <LanguageIcon />
-          </div>
-        */}
 
         <Paper square 
           style={{ height: bottomPanelHeight }}
@@ -724,7 +707,7 @@ export default function MapPage(): JSX.Element {
           <MapOverView
             open={showOverviewModal}
             handleClose={setShowModal}
-            type={overviewType}
+            type={overviewType ?? 'animal'}
             detail={selectedDetail}
           />
         ) : null}

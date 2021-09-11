@@ -10,15 +10,22 @@ import { MapStrings } from 'constants/strings';
 import { MapTileLayers } from 'constants/strings';
 import { formatLocal } from 'utils/time';
 import { plainToClass } from 'class-transformer';
+import { TileLayer } from 'leaflet';
 
 const hidePopup = (): void => {
   const doc = document.getElementById('popup');
+  if (!doc) {
+    return;
+  }
   doc.innerHTML = '';
   doc.classList.remove('appear-above-map');
 };
 
 const setPopupInnerHTML = (feature: ITelemetryPoint): void => {
   const doc = document.getElementById('popup');
+  if (!doc) {
+    return;
+  }
   const p = plainToClass(TelemetryDetail, feature.properties);
   const t = dayjs(p.date_recorded).format(formatLocal);
   const text = `
@@ -38,19 +45,19 @@ const setPopupInnerHTML = (feature: ITelemetryPoint): void => {
   doc.classList.add('appear-above-map');
 };
 
-// caribou herd boundaries
-const getCHB = () => {
-  const fl = new FeatureLayer({
-    url: 'https://services6.arcgis.com/ubm4tcTYICKBpist/arcgis/rest/services/Caribou_BC/FeatureServer/0'
-  });
-  return fl as L.TileLayer;
+// caribou herd boundaries 
+const getCHB = (): FeatureLayer => {
+  const fl = new FeatureLayer({url: 'https://services6.arcgis.com/ubm4tcTYICKBpist/arcgis/rest/services/Caribou_BC/FeatureServer/0'})
+  return fl;
+  // fixme: why was it returning as tilelayer?
+  // return fl as L.TileLayer;
 };
 
 // URL for BC Geographic Warehouse
 const bcgw_url = 'http://openmaps.gov.bc.ca/geo/pub/ows';
 
 // ENV regional boundaries
-const getERB = () => {
+const getERB = (): TileLayer => {
   return L.tileLayer.wms(bcgw_url, {
     layers: 'WHSE_ADMIN_BOUNDARIES.EADM_WLAP_REGION_BND_AREA_SVW',
     format: 'image/png',
@@ -60,7 +67,7 @@ const getERB = () => {
 };
 
 // parks and protected areas
-const getPPA = () => {
+const getPPA = (): TileLayer => {
   return L.tileLayer.wms(bcgw_url, {
     layers: 'WHSE_TANTALIS.TA_PARK_ECORES_PA_SVW',
     format: 'image/png',
@@ -70,7 +77,7 @@ const getPPA = () => {
 };
 
 // wildlife habitat areas
-const getWHA = () => {
+const getWHA = (): TileLayer => {
   return L.tileLayer.wms(bcgw_url, {
     layers: 'WHSE_WILDLIFE_MANAGEMENT.WCP_WILDLIFE_HABITAT_AREA_POLY',
     format: 'image/png',
@@ -80,7 +87,7 @@ const getWHA = () => {
 };
 
 // wildlife magement units
-const getWMU = () => {
+const getWMU = (): TileLayer => {
   return L.tileLayer.wms(bcgw_url, {
     layers: 'WHSE_WILDLIFE_MANAGEMENT.WAA_WILDLIFE_MGMT_UNITS_SVW',
     format: 'image/png',
@@ -90,7 +97,7 @@ const getWMU = () => {
 };
 
 // TRIM contour lines
-const getTCL = () => {
+const getTCL = (): TileLayer => {
   return L.tileLayer.wms(bcgw_url, {
     layers: 'WHSE_BASEMAPPING.TRIM_CONTOUR_LINES',
     format: 'image/png',
@@ -100,7 +107,7 @@ const getTCL = () => {
 };
 
 // ungulate winter ranges
-const getUWR = () => {
+const getUWR = (): TileLayer => {
   return L.tileLayer.wms(bcgw_url, {
     layers: 'WHSE_WILDLIFE_MANAGEMENT.WCP_UNGULATE_WINTER_RANGE_SP',
     format: 'image/png',
@@ -142,11 +149,11 @@ const initMap = (
   drawnItems: L.FeatureGroup,
   selectedPings: L.GeoJSON,
   drawSelectedLayer: () => void,
-  handleDrawLine: (l) => void,
+  handleDrawLine: (l: L.Layer) => void,
   handleDeleteLine: () => void,
 ): void => {
   mapRef.current = L.map('map', { zoomControl: true }).setView([55, -128], 6);
-  const layerPicker = L.control.layers(null, null, { position: 'topleft' });
+  const layerPicker = L.control.layers(undefined, undefined, { position: 'topleft' });
   L.drawLocal.draw.toolbar.buttons.polyline = MapStrings.drawLineLabel;
   L.drawLocal.draw.toolbar.buttons.polygon = MapStrings.drawPolygonLabel;
   L.drawLocal.draw.toolbar.buttons.rectangle = MapStrings.drawRectangleLabel;
@@ -171,7 +178,7 @@ const initMap = (
   mapRef.current.addControl(layerPicker);
 
   // line drawing control
-  const drawLabel = (e): L.Layer => {
+  const drawLabel = (e: L.LeafletEvent): L.Layer => {
     // Get the feature
     const lineString = e.layer.toGeoJSON();
     const distance = Math.round(length(lineString) * 10) / 10; // kms
@@ -204,19 +211,20 @@ const initMap = (
 
   // Set up the drawing events
   mapRef.current
-    .on('draw:created', (e) => {
-      drawnItems.addLayer((e as any).layer);
-      if ((e as any).layerType === 'polyline') {
+    .on('draw:created', (e: L.LeafletEvent) => {
+      // fixme: deprecated?
+      drawnItems.addLayer(e.layer);
+      if (e.type === 'polyline') {
         const line = drawLabel(e);
         handleDrawLine(line);
         return line;
       }
       drawSelectedLayer();
     })
-    .on('draw:edited', (e) => {
+    .on('draw:edited', () => {
       drawSelectedLayer();
     })
-    .on('draw:deletestop', (e) => {
+    .on('draw:deletestop', () => {
       drawSelectedLayer();
       handleDeleteLine();
     })
