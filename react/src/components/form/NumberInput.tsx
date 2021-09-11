@@ -34,7 +34,7 @@ export default function NumberField(props: INumberInputProps): JSX.Element {
    */
   useEffect(() => {
     setVal(defaultValue === -1 ? '' : defaultValue);
-    handleIsRequired(defaultValue);
+    handleIsRequired();
   }, [defaultValue]);
 
   useDidMountEffect(() => {
@@ -59,7 +59,7 @@ export default function NumberField(props: INumberInputProps): JSX.Element {
   // will receive warnings if these are not deleted
   const propsToPass = removeProps(props, [...inputPropsToRemove, 'defaultValue']);
 
-  const handleChange = (event): void => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setErr('')
     const target = event.target.value;
     // allow the negative sign at the start of input
@@ -77,11 +77,11 @@ export default function NumberField(props: INumberInputProps): JSX.Element {
     }
     // parseFloat will remove the '.' if inputted individually.
     setVal(target[target.length - 1] === '.' ? target : n);
-    handleIsRequired(target);
+    handleIsRequired();
   };
 
-  const handleIsRequired = (v: number): void => {
-    if (!v && required) {
+  const handleIsRequired = (): void => {
+    if (required) {
       setErr(FormStrings.isRequired);
     }
   }

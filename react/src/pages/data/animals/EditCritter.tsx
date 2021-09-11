@@ -43,7 +43,7 @@ export default function EditCritter(props: EditorProps<Animal | AttachedAnimal>)
         e = new MortalityEvent();
       }
       const o = Object.assign(e, editing);
-      return o;
+      return o as MortalityEvent;
     })
   }, [workflowType])
 

@@ -1,6 +1,7 @@
 import { DialogProps } from '@material-ui/core';
 import { AlertProps } from '@material-ui/lab/Alert';
 import { IUpsertPayload } from 'api/api_interfaces';
+import { InboundObj } from 'hooks/useFormHasError';
 
 /**
  * all modals and dialogs require these props
@@ -53,7 +54,7 @@ type ExportImportProps = ModalBaseProps & {
 /**
  * handlers for form components
  */
-type InputChangeHandler = (o: Record<string, string | number | boolean>) => void;
+type InputChangeHandler = (o: InboundObj) => void;
 type CheckBoxChangeHandler = (o: Record<string, boolean>) => void;
 
 /**

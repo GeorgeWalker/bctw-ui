@@ -11,6 +11,7 @@ import { DataLifeInput, IChangeDataLifeProps } from 'types/data_life';
 import useDidMountEffect from 'hooks/useDidMountEffect';
 import { formatAxiosError } from 'utils/errors';
 import { eCritterPermission } from 'types/permission';
+import { AxiosError } from 'axios';
 
 type EditDataLifeModalProps = ModalBaseProps & {
   attachment: CollarHistory;
@@ -37,12 +38,12 @@ export default function EditDataLifeModal(props: EditDataLifeModalProps): JSX.El
   }, [attachment]);
 
   // must be defined before mutation declarations
-  const onSuccess = async (data): Promise<void> => {
+  const onSuccess = async (data: CollarHistory): Promise<void> => {
     console.log('data life updated response:', data);
     responseDispatch({ severity: 'success', message: `data life updated` });
   };
 
-  const onError = async (err): Promise<void> => {
+  const onError = async (err: AxiosError): Promise<void> => {
     responseDispatch({ severity: 'error', message: `data life failed to update: ${formatAxiosError(err)}` });
   };
 

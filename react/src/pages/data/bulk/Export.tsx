@@ -23,11 +23,11 @@ export default function Export<T>({ data, message, title, open, handleClose }: I
 
   const getTypeExportFields = (a: T): string[] => Object.keys(a);
 
-  const add = (item): void => {
+  const add = (item: string): void => {
     const removed = excluded.splice(excluded.indexOf(item), 1)[0];
     setIncluded((old) => [...old, ...[removed]]);
   };
-  const remove = (item): void => {
+  const remove = (item: string): void => {
     const added = included.splice(included.indexOf(item), 1)[0];
     setExcluded((old) => [...old, ...[added]]);
   };

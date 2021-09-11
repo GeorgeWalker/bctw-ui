@@ -47,7 +47,7 @@ const useResponseState = (): INotificationMessage => {
 /**
  * dispatch a notification to the response context
  */
-const useResponseDispatch = (): ((notif: INotificationMessage | null) => null) => {
+const useResponseDispatch = (): ((notif: INotificationMessage | null) => void) => {
   const context = useContext(ApiResponseDispatch);
   if (context === null) {
     throw new Error('useResponseDispatch must be used within a responseProvider');

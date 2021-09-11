@@ -2,7 +2,7 @@ import { useState } from 'react';
 import DateTimeInput, { DTimeChangeOutput } from 'components/form/DateTimeInput';
 import { Box, Typography } from '@material-ui/core';
 import { DataLifeStrings } from 'constants/strings';
-import { DataLifeInput } from 'types/data_life';
+import { DataLife, DataLifeInput } from 'types/data_life';
 import { Dayjs } from 'dayjs';
 
 /**
@@ -39,11 +39,8 @@ export default function DataLifeInputForm(props: DataLifeInputProps): JSX.Elemen
   const [isModified, setIsModified] = useState<boolean>(false);
 
   const handleDateOrTimeChange = (d: DTimeChangeOutput): void => {
-    const k = getFirstKey(d) as keyof DataLifeInput;
+    const k = getFirstKey(d) as keyof DataLife;
     const v = getFirstValue(d);
-    if (k === 'canChangeDLEnd' || k === 'canChangeDLStart') {
-      return;
-    }
     dli[k] = v;
     if (k === 'attachment_start') {
       setMinDate(v);

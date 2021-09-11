@@ -15,7 +15,7 @@ type ConfirmModalProps = ModalBaseProps & {
   btnNoText?: string;
   btnYesText?: string;
   message: string | ReactNode;
-  handleClickYes: (v) => void;
+  handleClickYes: () => void;
 };
 
 export default function ConfirmModal({

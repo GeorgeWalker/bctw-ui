@@ -36,7 +36,9 @@ export default function AssignmentHistory(props: IAssignmentHistoryPageProps): J
     if (history.length) {
       const attachment = hasCollarCurrentlyAssigned(history);
       // console.log('found current device attachment', attachment);
-      setCurrentAttached(attachment);
+      if (attachment) {
+        setCurrentAttached(attachment);
+      }
     }
   }, [history]);
 

@@ -43,8 +43,8 @@ export default function CritterPage(): JSX.Element {
   const editProps = {
     editing: new Animal(),
     open: false, // overwritten in {AddEditViewer}
-    onSave: null, // save handler is overwritten in {ModifyCritterWrappper}
-    handleClose: null,
+    onSave: (): void => { /* do nothing */ },
+    handleClose: (): void => { /* do nothing */ },
   };
 
   return (

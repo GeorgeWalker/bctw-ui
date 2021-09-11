@@ -20,7 +20,7 @@ export type DateInputProps = StandardTextFieldProps & {
 
 export default function DateInput(props: DateInputProps): JSX.Element {
   const { defaultValue, label, changeHandler, propName, minDate, maxDate } = props;
-  const [selectedDate, setSelectedDate] = useState<Dayjs>(defaultValue ? dayjs(defaultValue) : undefined);
+  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(defaultValue ? dayjs(defaultValue) : null);
 
   const handleDateChange = (date: Dayjs | null): void => {
     setSelectedDate(date);

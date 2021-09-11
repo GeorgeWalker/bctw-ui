@@ -15,7 +15,7 @@ export type InboundObj = {
  */
 export default function useFormHasError(): [boolean, (r: Record<string, unknown>) => void] {
   const [errorsExist, setErrorsExist] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Record<string, unknown>>({});
 
   useEffect(() => {
     const numErrs = Object.keys(errors).length;

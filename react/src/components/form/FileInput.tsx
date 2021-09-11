@@ -6,7 +6,7 @@ interface FileInputProps extends StandardTextFieldProps {
   multiple?: boolean;
   fileName?: string;
   accept: '.keyx' | '.csv';
-  onFileChosen: (fieldName: string, files: FileList) => void;
+  onFileChosen: (fieldName: string, files: FileList | null) => void;
 }
 
 export default function FileInput(props: FileInputProps): JSX.Element {
