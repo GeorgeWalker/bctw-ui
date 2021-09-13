@@ -76,13 +76,13 @@ export default function AddEditViewer<T extends BCTWBaseType<T>>(props: IAddEdit
   };
 
   // override the open/close handlers and props of the child EditModal component
-  const editorProps: Pick<IEditModalProps<T>, 'editing' |'open' | 'onSave' | 'handleClose' | 'disableHistory'>
+  const editorProps: Pick<IEditModalProps<T>, 'editing' |'isOpen' | 'onSave' | 'handleClose' | 'disableHistory'>
   & Pick<EditorProps<T>, 'isCreatingNew'> = {
     // if this is a new instance - pass an empty object
     editing: isCreatingNew ? empty : editObj,
     // required in EditX components (ex. EditCritter)
     isCreatingNew,
-    open: showModal,
+    isOpen: showModal,
     disableHistory: isCreatingNew,
     handleClose,
     onSave: handleClickSave,

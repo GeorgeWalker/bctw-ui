@@ -10,7 +10,7 @@ import { InboundObj } from 'hooks/useFormHasError';
  * @param title modal title string
 */
 type ModalBaseProps = Pick<DialogProps, 'disableBackdropClick'> & {
-  open: boolean;
+  isOpen: boolean;
   handleClose: (v: boolean) => void;
   title?: string;
 };

@@ -53,7 +53,7 @@ export default function EditModal<T extends BCTWBaseType<T>>(props: IEditModalPr
   const {
     children,
     title,
-    open,
+    isOpen,
     handleClose,
     editing,
     onSave,
@@ -72,7 +72,7 @@ export default function EditModal<T extends BCTWBaseType<T>>(props: IEditModalPr
   const [historyParams, setHistoryParams] = useState<IHistoryPageProps<T>>();
 
   const [value, setValue] = React.useState(0);
-  const handleSwitch = (event: React.ChangeEvent<{ 1 }>, newValue: number): void => {
+  const handleSwitch = (event: React.ChangeEvent<{ 1: number }>, newValue: number): void => {
     setValue(newValue);
   };
 
@@ -98,10 +98,10 @@ export default function EditModal<T extends BCTWBaseType<T>>(props: IEditModalPr
 
   // when the modal opens, disable save
   useDidMountEffect(() => {
-    if (open) {
+    if (isOpen) {
       setCanSave(false);
     }
-  }, [open]);
+  }, [isOpen]);
 
   // if the error state changes, update the save status
   useDidMountEffect(() => {
@@ -140,7 +140,7 @@ export default function EditModal<T extends BCTWBaseType<T>>(props: IEditModalPr
     handleClose(false);
   };
 
-  const modalProps: ModalBaseProps = { open, handleClose: onClose, title };
+  const modalProps: ModalBaseProps = { isOpen: open, handleClose: onClose, title };
   const childrenComponents = (
     /**
      * wrap children in the change context provider so they have
@@ -149,7 +149,7 @@ export default function EditModal<T extends BCTWBaseType<T>>(props: IEditModalPr
     <ChangeContext.Provider value={handleChange}>
       {/* the history modal */}
       {!disableHistory && showHistory ? (
-        <Modal open={showHistory} handleClose={(): void => setShowHistory(false)}>
+        <Modal isOpen={showHistory} handleClose={(): void => setShowHistory(false)}>
           <HistoryPage {...historyParams} />
         </Modal>
       ) : null}

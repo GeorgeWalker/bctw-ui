@@ -145,7 +145,7 @@ export default function PerformAssignmentAction({
       <ConfirmModal
         handleClickYes={handleConfirmRemoveDevice}
         handleClose={closeModals}
-        open={showConfirmModal}
+        isOpen={showConfirmModal}
         message={ConfirmRemoval}
         title={CS.collarRemovalTitle}
       />

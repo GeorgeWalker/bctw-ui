@@ -16,7 +16,7 @@ import bulkStyles from 'pages/data/bulk/bulk_styles';
 
 type CollarImportProps = ModalBaseProps & {
 };
-export default function CollarImport({ open, handleClose }: CollarImportProps): JSX.Element {
+export default function CollarImport({ isOpen: open, handleClose }: CollarImportProps): JSX.Element {
   const bctwApi = useTelemetryApi();
   const styles = bulkStyles();
   const [importType, setImportType] = useState<'keyx' | 'csv' | 'template' | ''>('');
@@ -97,7 +97,7 @@ export default function CollarImport({ open, handleClose }: CollarImportProps): 
   };
 
   return (
-    <Modal open={open} handleClose={onClose} title={'Device Import'}>
+    <Modal isOpen={open} handleClose={onClose} title={'Device Import'}>
       <div>
         <Typography variant='h4'>{S.collarImportStartMsg}</Typography>
         <Typography variant={'h6'} onClick={(): void => setImportType('keyx')} className={'link link-hover'}>

@@ -24,7 +24,7 @@ export default function AlertPage(): JSX.Element {
   const useAlerts = useContext(AlertContext);
 
   const [alerts, setAlerts] = useState<MortalityAlert[]>([]);
-  const [selectedAlert, setSelectedAlert] = useState<TelemetryAlert | MortalityAlert>(null);
+  const [selectedAlert, setSelectedAlert] = useState<TelemetryAlert | MortalityAlert | null>(null);
   // display status of the modal that the user can perform the alert update from
   const [showEventModal, setShowEventModal] = useState(false);
   // display status of the modal that requires the user to confirm snoozing
@@ -53,7 +53,9 @@ export default function AlertPage(): JSX.Element {
   // alert is selected in table
   const handleSelectRow = (aid: number): void => {
     const selected = alerts.find((a) => a.alert_id === aid);
-    setSelectedAlert(selected);
+    if (selected) {
+      setSelectedAlert(selected);
+    }
   };
 
   // post the updated alert
@@ -179,13 +181,13 @@ export default function AlertPage(): JSX.Element {
         handleClickYes={handleConfirmSnooze}
         handleClose={(): void => setShowSnoozeModal(false)}
         message={snoozeMessage}
-        open={showSnoozeModal}
+        isOpen={showSnoozeModal}
       />
       {selectedAlert ? (
         <EventWrapper
           eventType={'mortality'}
           event={(selectedAlert as MortalityAlert).toMortalityEvent()}
-          open={showEventModal}
+          isOpen={showEventModal}
           handleClose={(): void => setShowEventModal(false)}
           onEventSaved={handleEventSaved}
         />

@@ -116,7 +116,7 @@ export default function MapDetails({
         <MapExport
           groupedAssignedPings={pingGroupChecked.length ? pingGroupChecked : groupedPings}
           groupedUnassignedPings={groupedUnassignedPings}
-          open={showExportModal}
+          isOpen={showExportModal}
           handleClose={(): void => setShowExportModal(false)}
           range={timeRange}
         />

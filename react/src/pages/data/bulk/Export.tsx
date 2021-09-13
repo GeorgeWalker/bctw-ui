@@ -10,13 +10,13 @@ type ImportProps<T> = ExportImportProps & {
   data: T[];
 }
 
-export default function Export<T>({ data, message, title, open, handleClose }: ImportProps<T>): JSX.Element {
+export default function Export<T>({ data, message, title, isOpen, handleClose }: ImportProps<T>): JSX.Element {
   const styles = bulkStyles();
   const [included, setIncluded] = useState<string[]>([]);
   const [excluded, setExcluded] = useState<string[]>([]);
 
   useEffect(() => {
-    if (open === true) {
+    if (isOpen) {
       reset();
     }
   }, [open]);
@@ -44,7 +44,7 @@ export default function Export<T>({ data, message, title, open, handleClose }: I
 
   return (
     <>
-      <Modal open={open} handleClose={handleClose} title={title}>
+      <Modal isOpen={isOpen} handleClose={handleClose} title={title}>
         <p>{message}</p>
         {
           data && data.length ?

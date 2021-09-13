@@ -82,7 +82,7 @@ export default function CollarPage(): JSX.Element {
         </>
       </RowSelectedProvider>
 
-      <CollarImport open={showImport} handleClose={(): void => setShowImport(false)} />
+      <CollarImport isOpen={showImport} handleClose={(): void => setShowImport(false)} />
     </ManageLayout>
   );
 }

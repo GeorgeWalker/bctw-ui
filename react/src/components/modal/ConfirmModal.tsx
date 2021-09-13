@@ -21,7 +21,7 @@ type ConfirmModalProps = ModalBaseProps & {
 export default function ConfirmModal({
   message,
   title,
-  open,
+  isOpen,
   handleClose,
   handleClickYes,
   btnNoText = 'No',
@@ -29,7 +29,7 @@ export default function ConfirmModal({
 }: ConfirmModalProps): JSX.Element {
   const classes = modalStyles();
   return (
-    <Modal open={open} handleClose={handleClose} title={title}>
+    <Modal isOpen={isOpen} handleClose={handleClose} title={title}>
       <Typography>{message}</Typography>
       <div className={classes.btns} color='primary'>
         <Button onClick={handleClickYes}>{btnYesText}</Button>

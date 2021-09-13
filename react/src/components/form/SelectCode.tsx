@@ -1,6 +1,6 @@
 import 'styles/form.scss';
 import { FormControl, Select, InputLabel, MenuItem, Checkbox } from '@material-ui/core';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import { useTelemetryApi } from 'hooks/useTelemetryApi';
 import { ICode, ICodeFilter } from 'types/code';
 import { NotificationMessage } from 'components/common';
@@ -49,7 +49,7 @@ export default function SelectCode(props: ISelectProps): JSX.Element {
     propName
   } = props;
   const bctwApi = useTelemetryApi();
-  const [value, setValue] = useState<string>(defaultValue);
+  const [value, setValue] = useState<string | undefined>(defaultValue);
   const [values, setValues] = useState<string[]>([]);
   const [codes, setCodes] = useState<ICode[]>([]);
   const [hasError, setHasError] = useState<boolean>(required && !defaultValue ? true : false);
@@ -103,28 +103,33 @@ export default function SelectCode(props: ISelectProps): JSX.Element {
   // call the parent change handler when the selected value or error status changes
   // use useEffect to ensure parent is notified when the code is required and empty
   useEffect(() => {
-    pushChange(value);
+    if (value) {
+      pushChange(value);
+    }
   }, [value, hasError])
 
+  const handleSelect = (event: ChangeEvent<{ name?: string | undefined; value: unknown; }>): void => {
+    const e = event.target.value;
+    multiple ? handleChangeMultiple(e as string[]) : handleChangeSingle(e as string);
+  }
+
   // default handler when @param multiple is false
-  const handleChange = (event: React.ChangeEvent<{ value }>): void => {
+  const handleChangeSingle = (v: string): void => {
     setHasError(false);
-    const v = event.target.value;
     setValue(v);
   };
 
   // default handler when @param multiple is true
-  const handleChangeMultiple = (event: React.ChangeEvent<{ value }>): void => {
-    const selected = event.target.value as string[];
-    setValues(selected);
-    pushChangeMultiple(selected);
+  const handleChangeMultiple = (v: string[]): void => {
+    setValues(v);
+    pushChangeMultiple(v);
   };
 
   // triggered when the default value is changed
   // ex. different editing object selected
   const reset = (): void => {
     const v = defaultValue;
-    if (multiple && defaultValue !== undefined) {
+    if (v && multiple && defaultValue !== undefined) {
       setValues([v]);
     } else {
       setValue(v);
@@ -166,9 +171,11 @@ export default function SelectCode(props: ISelectProps): JSX.Element {
     }
   };
 
+  
+
   return (
     <>
-      {isError ? (
+      {isError && error ? (
         <NotificationMessage severity='error' message={formatAxiosError(error)} />
       ) : isLoading || isFetching ? (
         <div>Please wait...</div>
@@ -185,14 +192,14 @@ export default function SelectCode(props: ISelectProps): JSX.Element {
             label={label}
             variant={'outlined'}
             value={multiple ? values : value}
-            onChange={multiple ? handleChangeMultiple : handleChange}
-            renderValue={(selected: string | string[]): string => {
+            onChange={handleSelect}
+            renderValue={(selected: unknown): React.ReactNode => {
               if (multiple) {
                 // remove empty string values
                 const l = (selected as string[]).filter((a) => a);
                 return l.length > 4 ? `${l.length} selected` : l.join(', ');
               }
-              return selected as string;
+              return selected as React.ReactNode;
             }}
             {...propsToPass}>
             {codes.map((c: ICode) => {

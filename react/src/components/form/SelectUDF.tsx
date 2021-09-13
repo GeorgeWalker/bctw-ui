@@ -29,7 +29,7 @@ export default function SelectUDF(props: ISelectProps): JSX.Element {
 
   // note: watching 'isSuccess' will not trigger rerenders when new data is fetched
   useEffect(() => {
-    if (isSuccess) {
+    if (isSuccess && data) {
       setUdfs(data);
     }
   }, [data]);
@@ -41,7 +41,7 @@ export default function SelectUDF(props: ISelectProps): JSX.Element {
   }, [triggerReset]);
 
   // when values are selected, set selected and call the parent handler
-  const handleChange = (event: React.ChangeEvent<{ value }>): void => {
+  const handleChange = (event: React.ChangeEvent<{ value: unknown }>): void => {
     const selected = event.target.value as string[];
     setValues(selected);
     changeHandler(udfs.filter((u) => selected.includes(u.key)));
@@ -49,7 +49,7 @@ export default function SelectUDF(props: ISelectProps): JSX.Element {
 
   return (
     <>
-      {isError ? (
+      {isError && error ? (
         <NotificationMessage severity='error' message={formatAxiosError(error)} />
       ) : isLoading || isFetching ? (
         <div>Please wait...</div>
@@ -62,7 +62,7 @@ export default function SelectUDF(props: ISelectProps): JSX.Element {
             variant={'outlined'}
             value={values}
             onChange={handleChange}
-            renderValue={(selected: string[]): string => selected.join(', ')}
+            renderValue={(selected: unknown): React.ReactNode => (selected as string[]).join(', ')}
             {...propsToPass}>
             {udfs.map((u: IUDF, idx: number) => {
               return (

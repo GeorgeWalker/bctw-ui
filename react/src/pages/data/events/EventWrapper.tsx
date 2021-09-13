@@ -29,7 +29,7 @@ export default function EventWrapper<E>({
   event,
   eventType,
   onEventSaved,
-  open,
+  isOpen: open,
   handleClose
 }: EventWrapperProps<E>): JSX.Element {
   const bctwApi = useTelemetryApi();
@@ -95,7 +95,7 @@ export default function EventWrapper<E>({
   }
 
   return (
-    <Modal open={open} handleClose={handleClose}>
+    <Modal isOpen={open} handleClose={handleClose}>
       <form className={'rootEditInput'} autoComplete={'off'}>
         <EditHeader<E>
           title={event.getHeaderTitle()}

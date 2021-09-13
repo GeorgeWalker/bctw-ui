@@ -224,7 +224,7 @@ export default function OwnerRequestPermission(): JSX.Element {
           saveButtonText={'Submit Permission Request'}
         />
         <PickCritterPermissionModal
-          open={showPickCritterModal}
+          isOpen={showPickCritterModal}
           handleClose={(): void => setShowPickCritterModal(false)}
           onSave={handleCrittersSelected}
           alreadySelected={permission?.access?.map((a) => a.critter_id)}

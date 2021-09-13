@@ -705,13 +705,13 @@ export default function MapPage(): JSX.Element {
         </Paper>
         {selectedDetail ? (
           <MapOverView
-            open={showOverviewModal}
+            isOpen={showOverviewModal}
             handleClose={setShowModal}
             type={overviewType ?? 'animal'}
             detail={selectedDetail}
           />
         ) : null}
-        <AddUDF open={showUdfEdit} handleClose={(): void => setShowUdfEdit(false)} />
+        <AddUDF isOpen={showUdfEdit} handleClose={(): void => setShowUdfEdit(false)} />
       </div>
     </div>
   );

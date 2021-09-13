@@ -13,7 +13,7 @@ import { eUDFType, IUDF, transformUdfToCodeFilter } from 'types/udf';
 import { Icon } from 'components/common';
 import { MapStrings } from 'constants/strings';
 import { columnToHeader } from 'utils/common_helpers';
-import MultiSelect, { ISelectMultipleData } from 'components/form/MultiSelect';
+import MultiSelect, { SelectMultiple } from 'components/form/MultiSelect';
 import useDidMountEffect from 'hooks/useDidMountEffect';
 import { CODE_FILTERS, DEVICE_STATUS_OPTIONS } from 'pages/map/map_constants';
 import { Tooltip } from 'components/common';
@@ -29,7 +29,7 @@ type MapFiltersProps = {
   onClickEditUdf: () => void;
   onShowLatestPings: (b: boolean) => void;
   onShowLastFixes: (b: boolean) => void;
-  onShowUnassignedDevices: (o: ISelectMultipleData[]) => void;
+  onShowUnassignedDevices: (o: SelectMultiple[]) => void;
 };
 
 export default function MapFilters(props: MapFiltersProps): JSX.Element {
@@ -100,7 +100,7 @@ export default function MapFilters(props: MapFiltersProps): JSX.Element {
    * @param event the button click event
    * @param reset force calling the parent handler with empty array
    */
-  const handleApplyFilters = (event: React.MouseEvent<HTMLInputElement>, reset = false): void => {
+  const handleApplyFilters = (reset = false): void => {
     props.onApplyFilters({ start, end }, reset ? [] : filters);
     // if dates were changed, it will draw all the new points, so
     // set the status of the show latest pings checkbox to false
@@ -122,7 +122,7 @@ export default function MapFilters(props: MapFiltersProps): JSX.Element {
 
     setFilters([]);
     // since setFilters is async, call handleApplyFilters manually with an empty array
-    handleApplyFilters(null, true);
+    handleApplyFilters(true);
   };
 
   // creates select elements
@@ -134,7 +134,7 @@ export default function MapFilters(props: MapFiltersProps): JSX.Element {
           multiple
           label={cf.label ?? columnToHeader(cf.header)}
           codeHeader={cf.header}
-          changeHandler={null}
+          changeHandler={(): void => { /* do nothing */}}
           changeHandlerMultiple={(codes): void => changeFilter(codes, cf.header)}
           triggerReset={reset}
           addEmptyOption={true}
@@ -150,7 +150,7 @@ export default function MapFilters(props: MapFiltersProps): JSX.Element {
     changeFilter(asNormalFilters, 'critter_id');
   };
 
-  const handleChangeDeviceList = (values: ISelectMultipleData[]): void => {
+  const handleChangeDeviceList = (values: SelectMultiple[]): void => {
     const asFilters: ICodeFilter[] = values.map((v) => {
       return { code_header: 'device_id', description: v.value as number, code: '', code_header_title: '', id: 0 };
     });
@@ -166,7 +166,7 @@ export default function MapFilters(props: MapFiltersProps): JSX.Element {
     }
   };
 
-  const createDeviceList = (): ISelectMultipleData[] => {
+  const createDeviceList = (): SelectMultiple[] => {
     const merged = [...uniqueDevices, ...unassignedDevices].sort((a, b) => a - b);
     return merged.map((d) => {
       const displayLabel = unassignedDevices.includes(d) ? `${d} (unassigned)` : d.toString();
@@ -331,7 +331,7 @@ export default function MapFilters(props: MapFiltersProps): JSX.Element {
               <Divider />
 
               <Box className={'form-buttons'} display="flex" justifyContent="flex-end" py={3}>
-                <Button color='primary' variant='contained' disabled={applyButtonStatus} onClick={handleApplyFilters}>
+                <Button color='primary' variant='contained' disabled={applyButtonStatus} onClick={(): void => handleApplyFilters()}>
                   Apply Filters
                 </Button>
                 <Button color="primary" variant='outlined' disabled={numFiltersSelected === 0} onClick={resetFilters}>

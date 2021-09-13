@@ -437,7 +437,7 @@ export default function EditCollar(props: EditorProps<Collar>): JSX.Element {
               ) : null} */}
               { /* retrieval workflow */ }
               {!isCreatingNew && showRetrievalWorkflow ? (
-                <Modal open={showRetrievalWorkflow} handleClose={(): void => setShowRetrievalWorkflow(false)}>
+                <Modal isOpen={showRetrievalWorkflow} handleClose={(): void => setShowRetrievalWorkflow(false)}>
                   <RetrievalEventForm
                     device_id={editing.device_id}
                     handleClose={(): void => setShowRetrievalWorkflow(false)}
@@ -448,7 +448,7 @@ export default function EditCollar(props: EditorProps<Collar>): JSX.Element {
               ) : null}
               { /* malfunction workflow */ }
               {!isCreatingNew && showMalfunctionWorkflow ? (
-                <Modal open={showMalfunctionWorkflow} handleClose={(): void => setShowMalfunctionWorkflow(false)}>
+                <Modal isOpen={showMalfunctionWorkflow} handleClose={(): void => setShowMalfunctionWorkflow(false)}>
                   <MalfunctionEventForm
                     device_id={editing.device_id}
                     handleClose={(): void => setShowMalfunctionWorkflow(false)}

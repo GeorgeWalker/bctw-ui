@@ -179,13 +179,13 @@ export default function EditCritter(props: EditorProps<Animal | AttachedAnimal>)
               {/* dont show assignment history for new critters */}
               {!isCreatingNew ? (
                 <AssignmentHistory
-                  open={showAssignmentHistory}
+                  isOpen={showAssignmentHistory}
                   handleClose={(): void => setShowAssignmentHistory(false)}
                   critter_id={editing.critter_id}
                   permission_type={editing.permission_type}
                 />
               ) : null}
-              <EventWrapper eventType={workflowType} open={showWorkflowForm} event={event} handleClose={(): void => setShowWorkflowForm(false)}/>
+              <EventWrapper eventType={workflowType} isOpen={showWorkflowForm} event={event} handleClose={(): void => setShowWorkflowForm(false)}/>
             </>
           );
         }}

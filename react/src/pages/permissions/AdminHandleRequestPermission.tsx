@@ -176,7 +176,7 @@ export default function AdminHandleRequestPermissionPage(): JSX.Element {
               handleClickYes={handleGrantOrDenyPermission}
               title={isGrant ? 'Confirm Grant Permission' : 'Confirm Deny Permission'}
               message={isGrant ? confirmGrantMesg : DenyMessage}
-              open={showConfirmModal}
+              isOpen={showConfirmModal}
               handleClose={(): void => setShowConfirmModal(false)}
             />
           )}

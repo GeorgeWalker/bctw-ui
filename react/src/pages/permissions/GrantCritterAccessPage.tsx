@@ -71,7 +71,7 @@ export default function GrantCritterAccessPage(): JSX.Element {
           <Button disabled={!user?.id} onClick={(): void => setShowModal(true)}>Edit User Animal Access</Button>
         </div>
         <PickCritterPermissionModal
-          open={showModal}
+          isOpen={showModal}
           handleClose={(): void => setShowModal(false)}
           title={`Modifying ${user.uid}'s Animal Access`}
           onSave={handleSave}

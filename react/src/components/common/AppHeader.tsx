@@ -129,7 +129,7 @@ const AppHeader = ({ children }: AppheaderProps): JSX.Element => {
           </ul>
         </nav>
       </div>
-      <Modal title={`Alerts (${alertCount})`} open={showAlerts} handleClose={(): void => setShowAlerts(false)}>
+      <Modal title={`Alerts (${alertCount})`} isOpen={showAlerts} handleClose={(): void => setShowAlerts(false)}>
         <UserAlert />
       </Modal>
     </header>

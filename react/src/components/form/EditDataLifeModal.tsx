@@ -23,7 +23,7 @@ type EditDataLifeModalProps = ModalBaseProps & {
  * note: integrate this with @function EditModal ?
  */
 export default function EditDataLifeModal(props: EditDataLifeModalProps): JSX.Element {
-  const { attachment, open, handleClose, permission_type } = props;
+  const { attachment, isOpen, handleClose, permission_type } = props;
   const bctwApi = useTelemetryApi();
   const responseDispatch = useResponseDispatch();
 
@@ -62,7 +62,7 @@ export default function EditDataLifeModal(props: EditDataLifeModalProps): JSX.El
 
   return (
     <Modal
-      open={open}
+      isOpen={isOpen}
       handleClose={handleClose}
       title={`Edit Data Life for ${attachment.device_make} Device ${attachment.device_id}`}>
       <div>

@@ -15,12 +15,15 @@ import { UserCritterAccess } from 'types/user';
 import { ModalBaseProps } from 'components/component_interfaces';
 import { useQueryClient } from 'react-query';
 import { useResponseDispatch } from 'contexts/ApiResponseContext';
-import { filterOutNonePermissions } from 'types/permission';
+import { filterOutNonePermissions, IUserCritterPermissionInput } from 'types/permission';
 import PickCritterPermissionModal from 'pages/permissions/PickCritterPermissionModal';
 import EditTable, { EditTableRowAction } from 'components/table/EditTable';
 import { plainToClass } from 'class-transformer';
+import { AxiosError } from 'axios';
+import { InboundObj } from 'hooks/useFormHasError';
+import { formatAxiosError } from 'utils/errors';
 
-export default function AddUDF({ open, handleClose }: ModalBaseProps): JSX.Element {
+export default function AddUDF({ isOpen, handleClose }: ModalBaseProps): JSX.Element {
   const bctwApi = useTelemetryApi();
   const queryClient = useQueryClient();
   const responseDispatch = useResponseDispatch();
@@ -28,7 +31,7 @@ export default function AddUDF({ open, handleClose }: ModalBaseProps): JSX.Eleme
   const useUser = useContext(UserContext);
   const [udfs, setUdfs] = useState<IUDF[]>([]);
   const [showCritterSelection, setShowCritterSelection] = useState<boolean>(false);
-  const [currentUdf, setCurrentUdf] = useState<IUDF>(null);
+  const [currentUdf, setCurrentUdf] = useState<IUDF | null>(null);
   const [canSave, setCanSave] = useState<boolean>(false);
 
   // fetch UDFs for this user
@@ -41,7 +44,7 @@ export default function AddUDF({ open, handleClose }: ModalBaseProps): JSX.Eleme
 
   // when the udfs are fetched
   useEffect(() => {
-    if (udfStatus === 'success') {
+    if (udfStatus === 'success' && udfResults) {
       setUdfs(udfResults);
       if (!udfResults.length) {
         addRow();
@@ -51,7 +54,7 @@ export default function AddUDF({ open, handleClose }: ModalBaseProps): JSX.Eleme
 
   // when critters are fetched
   useEffect(() => {
-    if (critterStatus === 'success') {
+    if (critterStatus === 'success' && critterResults) {
       setCritters(critterResults);
     }
   }, [critterStatus]);
@@ -61,8 +64,8 @@ export default function AddUDF({ open, handleClose }: ModalBaseProps): JSX.Eleme
     queryClient.invalidateQueries('getUDF');
   };
 
-  const onError = (e): void => {
-    responseDispatch({ severity: 'error', message: `failed to save user defined group: ${e}` });
+  const onError = (e: AxiosError): void => {
+    responseDispatch({ severity: 'error', message: `failed to save user defined group: ${formatAxiosError(e)}` });
   };
 
   // setup the save mutation to save the UDF
@@ -86,7 +89,7 @@ export default function AddUDF({ open, handleClose }: ModalBaseProps): JSX.Eleme
   };
 
   // when user changes the group name textfield
-  const handleChangeName = (v: Record<string, string | number | boolean>, udf: IUDF): void => {
+  const handleChangeName = (v: InboundObj, udf: IUDF): void => {
     const newKey = v['group'] as string;
     if (!newKey) {
       return;
@@ -113,7 +116,7 @@ export default function AddUDF({ open, handleClose }: ModalBaseProps): JSX.Eleme
     setShowCritterSelection(false);
     const thisUDF = Object.assign({}, currentUdf);
     thisUDF.changed = true;
-    thisUDF.value = critterIDs;
+    thisUDF.value  = critterIDs;
     const idx = udfs.findIndex((udf) => udf.key === thisUDF.key);
     const cp = [...udfs];
     cp[idx] = thisUDF;
@@ -191,7 +194,7 @@ export default function AddUDF({ open, handleClose }: ModalBaseProps): JSX.Eleme
 
   const headers = ['Group Name', 'Animals', '#', 'Edit', 'Delete', 'Duplicate'];
   return (
-    <Modal open={open} handleClose={onClose}>
+    <Modal isOpen={isOpen} handleClose={onClose}>
       {isLoading ? <CircularProgress /> : null}
 
       <EditTable
@@ -209,7 +212,7 @@ export default function AddUDF({ open, handleClose }: ModalBaseProps): JSX.Eleme
 
       {currentUdf ? (
         <PickCritterPermissionModal
-          open={showCritterSelection}
+          isOpen={showCritterSelection}
           handleClose={(): void => setShowCritterSelection(false)}
           onSave={handleCrittersSelected}
           alreadySelected={currentUdf.value}

@@ -95,7 +95,7 @@ export default function ModifyCollarWrapper(props: IModifyWrapperProps): JSX.Ele
       <ConfirmModal
         handleClickYes={handleConfirmDelete}
         handleClose={(): void => setShow(false)}
-        open={show}
+        isOpen={show}
         message={createDeleteMessage()}
         title={`Deleting ${editing?.device_id} (${editing.device_make})`}
       />

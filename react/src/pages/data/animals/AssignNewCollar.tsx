@@ -43,7 +43,7 @@ export default function AssignNewCollarModal({ critter_id, dli, onClose, show, o
 
   return (
     <>
-      <Modal open={show} handleClose={onClose}>
+      <Modal isOpen={show} handleClose={onClose}>
         <DataTable
           headers={Collar.propsToDisplay}
           title={CS.collarAssignmentTitle}

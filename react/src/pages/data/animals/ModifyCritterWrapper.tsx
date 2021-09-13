@@ -113,7 +113,7 @@ export default function ModifyCritterWrapper(props: IModifyWrapperProps): JSX.El
       <ConfirmModal
         handleClickYes={handleConfirmDelete}
         handleClose={(): void => setShow(false)}
-        open={show}
+        isOpen={show}
         message={deleteMessage()}
         title={`Deleting ${editing?.name}`}
       />

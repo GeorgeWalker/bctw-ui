@@ -33,8 +33,8 @@ export default function ImportExportViewer<T>({ data, iTitle, iMsg, eTitle, eMsg
     setShowImportModal(false);
   }
 
-  const importProps: ExportImportProps = { title: iTitle, message: iMsg, handleClose, open: showImportModal, downloadTemplate }
-  const exportProps = { title: eTitle, message: eMsg, data, handleClose, open: showExportModal }
+  const importProps: ExportImportProps = { title: iTitle, message: iMsg, handleClose, isOpen: showImportModal, downloadTemplate }
+  const exportProps = { title: eTitle, message: eMsg, data, handleClose, isOpen: showExportModal }
 
   return (
     <>

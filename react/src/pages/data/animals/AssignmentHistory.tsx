@@ -10,7 +10,7 @@ import { eCritterPermission, permissionCanModify } from 'types/permission';
 import Button from 'components/form/Button';
 import EditDataLifeModal from 'components/form/EditDataLifeModal';
 
-export type IAssignmentHistoryPageProps = Pick<ModalBaseProps, 'open' | 'handleClose'> & {
+export type IAssignmentHistoryPageProps = ModalBaseProps & {
   critter_id: string;
   permission_type: eCritterPermission;
 };
@@ -21,7 +21,7 @@ export type IAssignmentHistoryPageProps = Pick<ModalBaseProps, 'open' | 'handleC
  * accessed from @function EditCritter main page
  */
 export default function AssignmentHistory(props: IAssignmentHistoryPageProps): JSX.Element {
-  const { critter_id, open, handleClose, permission_type } = props;
+  const { critter_id, isOpen, handleClose, permission_type } = props;
   const bctwApi = useTelemetryApi();
   const [currentAttachment, setCurrentAttached] = useState<CollarHistory>(new CollarHistory());
   const [selectedAttachment, setSelectedAttachment] = useState<CollarHistory>(new CollarHistory());
@@ -56,7 +56,7 @@ export default function AssignmentHistory(props: IAssignmentHistoryPageProps): J
   };
 
   return (
-    <Modal open={open} handleClose={handleClose}>
+    <Modal isOpen={isOpen} handleClose={handleClose}>
       <DataTable
         title={CollarStrings.assignmentHistoryByAnimalTitle}
         headers={CollarHistory.propsToDisplay}
@@ -68,7 +68,7 @@ export default function AssignmentHistory(props: IAssignmentHistoryPageProps): J
       <EditDataLifeModal
         attachment={selectedAttachment}
         handleClose={(): void => setShowEditDL(false)}
-        open={showEditDL}
+        isOpen={showEditDL}
         permission_type={permission_type}
       />
     </Modal>

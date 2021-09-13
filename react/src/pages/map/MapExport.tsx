@@ -26,7 +26,7 @@ type ImportProps = ModalBaseProps & {
   2) all time data - uses the export API endpoint to retrieve data older than the currently
   selected window.
 */
-export default function Export({ open, handleClose, groupedAssignedPings, range}: ImportProps): JSX.Element {
+export default function Export({ isOpen: open, handleClose, groupedAssignedPings, range}: ImportProps): JSX.Element {
   const bctwApi = useTelemetryApi();
   const [exportParams, setExportParams] = useState<{type: eExportType, timespan: 'all' | 'selected'}>(null);
   const responseDispatch = useResponseDispatch();
@@ -124,7 +124,7 @@ export default function Export({ open, handleClose, groupedAssignedPings, range}
 
   const cellClass = 'clickable-cell';
   return (
-    <Modal open={open} handleClose={handleClose} title={'Export'}>
+    <Modal isOpen={open} handleClose={handleClose} title={'Export'}>
       <>
         {isLoading ? <CircularProgress /> : null}
         <p><b>{critter_ids.length}</b> unique animals selected. <b>{collar_ids.length}</b> unique devices selected</p>

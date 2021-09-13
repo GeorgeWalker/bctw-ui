@@ -60,7 +60,7 @@ export default function UserAdminPage(): JSX.Element {
         />
         <div className={'button-row'}>
           <AddEditViewer<User> editText={'User' }addText={'User'} editing={userModified} empty={new User()} onSave={saveUser} onDelete={deleteUser}>
-            <EditUser editing={new User()} open={false} onSave={null} handleClose={null} />
+            <EditUser editing={new User()} isOpen={false} onSave={(): void => { /* todo: */}} handleClose={(): void => { /* todo: */}} />
           </AddEditViewer>
         </div>
       </div>

@@ -1,20 +1,22 @@
 import { Checkbox, FormControl, InputLabel, MenuItem, OutlinedInput, Select, SelectProps } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
 
-export interface ISelectMultipleData {
+type SelectValue = string | number;
+
+export type SelectMultiple = {
   id: number;
-  value: string | number;
+  value: SelectValue;
   default?: boolean;
   displayLabel?: string;
 }
 
-type ISelectMultipleProps<T extends ISelectMultipleData> = SelectProps & {
+type SelectMultipleProps = SelectProps & {
   label: string;
   renderValue?: (value: unknown) => React.ReactNode;
   renderTypeLabel?: string; // what to show when multiple are selected
-  changeHandler: (o: T[]) => void;
+  changeHandler: (o: SelectMultiple[]) => void;
   triggerReset?: boolean; // force unselect of all values
-  data: T[];
+  data: SelectMultiple[];
 };
 
 const selectAll = { id: -1, value: 'Select All', default: false };
@@ -23,14 +25,15 @@ const selectAll = { id: -1, value: 'Select All', default: false };
  * a multi-select dropdown component. unlike the @function SelectCode component,
  * @param data must be provided  
  */
-export default function MultiSelect<T extends ISelectMultipleData>(props: ISelectMultipleProps<T>): JSX.Element {
+export default function MultiSelect(props: SelectMultipleProps): JSX.Element {
   const { label, data, triggerReset, changeHandler, renderTypeLabel } = props;
-  const getDefaults = (): unknown[] => data.filter((d) => d.default).map((o) => o.value);
-  const [selected, setSelected] = useState(getDefaults());
 
-  const handleCheckRow = (item: T, checked: boolean): void => {
+  const getDefaults = () => data.filter((d) => d.default).map((o) => o.value);
+  const [selected, setSelected] = useState<SelectValue[]>(getDefaults());
+
+  const handleCheckRow = (item: SelectMultiple, checked: boolean): void => {
     const { id, value } = item;
-    let newSelected = [];
+    let newSelected: SelectValue[] = [];
     // when the option checked is not 'select all'
     if (id !== selectAll.id) {
       newSelected = selected;
@@ -73,7 +76,7 @@ export default function MultiSelect<T extends ISelectMultipleData>(props: ISelec
         renderValue={props.renderValue ?? ((): string =>
           selected.length > 3 ? `${selected.length} ${renderTypeLabel ?? ''} selected` : selected.join(', ')
         )}>
-        {[...[selectAll], ...data].map((d: T, idx: number) => {
+        {[...[selectAll], ...data].map((d: SelectMultiple, idx: number) => {
           return (
             <MenuItem key={`${idx}-${d.id}`} value={d.value}>
               <Checkbox

@@ -36,7 +36,7 @@ const Transition = React.forwardRef(function Transition(
   return <Fade ref={ref} {...props} />;
 });
 
-export default function FullScreenDialog({ open, handleClose, children }: ModalProps): JSX.Element {
+export default function FullScreenDialog({ isOpen: open, handleClose, children }: ModalProps): JSX.Element {
   const classes = useStyles();
   
   return (

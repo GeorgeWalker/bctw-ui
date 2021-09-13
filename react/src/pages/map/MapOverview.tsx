@@ -10,16 +10,17 @@ import { Animal, AttachedAnimal } from 'types/animal';
 import { Collar } from 'types/collar';
 import { BCTWType } from 'types/common_types';
 import { ITelemetryDetail } from 'types/map';
-import { permissionCanModify } from 'types/permission';
+import { eCritterPermission, permissionCanModify } from 'types/permission';
+import { formatAxiosError } from 'utils/errors';
 
 type CritterOverViewProps = ModalBaseProps & {
   type: BCTWType;
   detail: ITelemetryDetail;
 };
 
-export default function MapOverview({ type, detail, open, handleClose }: CritterOverViewProps): JSX.Element {
+export default function MapOverview({ type, detail, isOpen, handleClose }: CritterOverViewProps): JSX.Element {
   const bctwApi = useTelemetryApi();
-  const [editObj, setEditObj] = useState<Animal | Collar>(null);
+  const [editObj, setEditObj] = useState<Animal | Collar>({} as Animal);
   const [canEdit, setCanEdit] = useState<boolean>(false);
   const { critter_id, collar_id } = detail;
 
@@ -31,7 +32,7 @@ export default function MapOverview({ type, detail, open, handleClose }: Critter
 
   useEffect(() => {
     if (status === 'success') {
-      const canModify = permissionCanModify(data.permission_type);
+      const canModify = permissionCanModify(data?.permission_type ?? eCritterPermission.none);
       setCanEdit(canModify);
       if (type === 'animal') {
         (data as AttachedAnimal).device_id = detail.device_id;
@@ -60,24 +61,25 @@ export default function MapOverview({ type, detail, open, handleClose }: Critter
     update();
   }, [editObj]);
 
-  if (isError) {
-    return <div>{error}</div>;
+  if (isError && error) {
+    return <div>{formatAxiosError(error)}</div>;
   }
 
   // props to pass to edit modal
   // fixme: casting detail
-  const editProps = { editing: editObj ?? (detail as any), handleClose, open, onSave: null, isEdit: canEdit };
+  const toPass: unknown = editObj ?? detail;
+  const editProps = { handleClose, isOpen, onSave: (): void => {/* do nothing */}, isEdit: canEdit };
 
   if (type === 'animal') {
     return (
-      <ModifyCritterWrapper editing={(editObj as Animal) ?? (detail as any)}>
-        <EditCritter {...editProps} />
+      <ModifyCritterWrapper editing={toPass as Animal}>
+        <EditCritter {...editProps}  editing={toPass as Animal}/>
       </ModifyCritterWrapper>
     );
   } else {
     return (
-      <ModifyCollarWrapper editing={(editObj as Collar) ?? (detail as any)}>
-        <EditCollar {...editProps} />
+      <ModifyCollarWrapper editing={toPass as Collar}>
+        <EditCollar {...editProps} editing={toPass as Collar} />
       </ModifyCollarWrapper>
     );
   }

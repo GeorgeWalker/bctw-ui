@@ -38,7 +38,7 @@ type SelectedUserCritterAccessInput = IUserCritterAccessInput & {
  * @param userToLoad unless specified, loads permissions for the current user
 */
 export default function PickCritterPermissionModal({
-  open,
+  isOpen,
   handleClose,
   onSave,
   filter,
@@ -67,8 +67,10 @@ export default function PickCritterPermissionModal({
   // if a user is not passed in as a prop, default the state to the current user
   useEffect(() => {
     const u = !userToLoad && useUser.user ? useUser.user : userToLoad;
-    setUser(u);
-    setPermissionsAccessible(useUser?.user?.is_admin ? adminPermissionOptions : ownerPermissionOptions);
+    if (u) {
+      setUser(u);
+      setPermissionsAccessible(u.is_admin ? adminPermissionOptions : ownerPermissionOptions);
+    }
   }, [userToLoad, useUser]);
 
   // when the selected state changes, update the save button's disabled state
@@ -189,7 +191,7 @@ export default function PickCritterPermissionModal({
   };
 
   return (
-    <Modal open={open} handleClose={beforeClose}>
+    <Modal isOpen={isOpen} handleClose={beforeClose}>
       <DataTable
         headers={UserCritterAccess.propsToDisplay}
         title={title}

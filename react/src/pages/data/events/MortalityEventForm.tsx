@@ -69,7 +69,7 @@ export default function MortalityEventForm({ event, handleFormChange}: MortEvent
 
   const { fields } = mortality;
   if (!fields) {
-    return null;
+    return <></>;
   }
 
   return (
@@ -81,7 +81,7 @@ export default function MortalityEventForm({ event, handleFormChange}: MortEvent
           <Button onClick={(): void => setShowDLForm((o) => !o)}>Edit Data Life</Button>
         </Box>,
         <Box {...boxProps} pt={2}>
-          <span>{fields.mortality_investigation.long_label}</span>
+          <span>{fields.mortality_investigation?.long_label}</span>
           {FormFromFormfield(mortality, fields.mortality_investigation, onChange)}
         </Box>,
         FormFromFormfield(mortality, fields.mortality_record, onChange, false, true)
@@ -112,7 +112,7 @@ export default function MortalityEventForm({ event, handleFormChange}: MortEvent
       <EditDataLifeModal
         attachment={mortality.getCollarHistory()}
         handleClose={(): void => setShowDLForm(false)}
-        open={showDLForm}
+        isOpen={showDLForm}
         // fixme: where to get permission
         permission_type={eCritterPermission.editor}
       />

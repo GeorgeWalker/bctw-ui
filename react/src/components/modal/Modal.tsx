@@ -7,14 +7,14 @@ import { Icon } from 'components/common';
 import { removeProps } from 'utils/common_helpers';
 
 export default function Modal(props: ModalProps): JSX.Element {
-  const { open, title, handleClose, children } = props;
+  const { isOpen, title, handleClose, children } = props;
   const propsToPass = removeProps(props, ['handleClose', 'disableBackdropClick']);
   // todo: merge styles
   const classes = modalStyles();
   return (
     <Dialog
       className={'dialog-modal'}
-      open={open}
+      open={isOpen}
       onClose={handleClose}
       closeAfterTransition
       BackdropComponent={Backdrop}

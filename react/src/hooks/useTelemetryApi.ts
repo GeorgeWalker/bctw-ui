@@ -244,7 +244,7 @@ export const useTelemetryApi = () => {
   /** default type getter for animals or collars
    * @returns
    */
-  const useType = <T>(type: BCTWType, id: string): UseQueryResult<T> => {
+  const useType = <T>(type: BCTWType, id: string): UseQueryResult<T, AxiosError> => {
     return useQuery<T, AxiosError>(['getType', type, id], () => bulkApi.getType(type, id), {
       ...defaultQueryOptions
     });

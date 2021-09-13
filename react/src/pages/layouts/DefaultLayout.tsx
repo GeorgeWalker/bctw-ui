@@ -16,7 +16,7 @@ type IDefaultLayoutProps = {
 export default function DefaultLayout({ children }: IDefaultLayoutProps): JSX.Element {
   const userChanges = useContext(UserContext);
   const useAlert = useContext(AlertContext);
-  const [err, setErr] = useState<string>(null);
+  const [err, setErr] = useState<string>('');
   const [showAlerts, setShowAlerts] = useState<boolean>(false);
 
   useEffect(() => {
@@ -55,7 +55,7 @@ export default function DefaultLayout({ children }: IDefaultLayoutProps): JSX.El
   };
   return (
     <>
-      <Modal title={`Alerts (${useAlert?.alerts?.length})`} open={showAlerts} handleClose={(): void => setShowAlerts(false)} {...disableCloseModalProps}>
+      <Modal title={`Alerts (${useAlert?.alerts?.length})`} isOpen={showAlerts} handleClose={(): void => setShowAlerts(false)} {...disableCloseModalProps}>
         <UserAlert />
       </Modal>
       {children}

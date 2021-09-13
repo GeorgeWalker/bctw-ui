@@ -1,16 +1,16 @@
 import { Chip, TextField } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { useEffect, useState } from 'react';
-import { ISelectMultipleData } from './MultiSelect';
+import { SelectMultiple } from './MultiSelect';
 
-type IAutocompleteProps<T extends ISelectMultipleData> = {
+type AutocompleteProps<T extends SelectMultiple> = {
   label: string;
   changeHandler: (o: T[]) => void;
   triggerReset?: boolean; // unselect of all values
   data: T[];
 };
 
-export default function MultiSelect<T extends ISelectMultipleData>(props: IAutocompleteProps<T>): JSX.Element {
+export default function MultiSelect<T extends SelectMultiple>(props: AutocompleteProps<T>): JSX.Element {
   const { label, data, triggerReset, changeHandler } = props;
   const [selected, setSelected] = useState<T[]>([]);
 
@@ -41,7 +41,7 @@ export default function MultiSelect<T extends ISelectMultipleData>(props: IAutoc
             <Chip variant='outlined' key={option.id} label={option.displayLabel} {...getTagProps({ index })} />
           ));
       }}
-      getOptionLabel={(option: ISelectMultipleData): string => option.displayLabel ?? ''}
+      getOptionLabel={(option: SelectMultiple): string => option.displayLabel ?? ''}
       renderInput={(params): JSX.Element => <TextField {...params} label={label} variant='outlined' />}
       onChange={handleChange}
     />
