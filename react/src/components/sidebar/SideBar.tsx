@@ -37,14 +37,12 @@ export default function SideBar({ routes }: SideBarProps): JSX.Element {
   const handleSetVisible = (routeNames: string[]): void => {
     const curRoutes = routes.filter((r) => routeNames.includes(r.name));
     if (isAdmin) {
-      curRoutes.push(routes.find((r) => r.name === 'animal-manager'));
-      curRoutes.push(routes.find((r) => r.name === 'codes'));
-      curRoutes.push(routes.find((r) => r.name === 'delegation-requests'));
-      // curRoutes.push(routes.find((r) => r.name === 'onboarding-requests'));
-      curRoutes.push(routes.find((r) => r.name === 'users'));
+      const adminRoutes = routes.filter(r => ['animal-manager', 'codes','delegation-requests', 'users' ].includes(r.name));
+      curRoutes.push(...adminRoutes);
     }
     if (isOwner) {
-      curRoutes.push(routes.find((r) => r.name === 'delegation'));
+      const ownerRoutes = routes.filter((r) => r.name === 'delegation');
+      curRoutes.push(...ownerRoutes);
     }
     setVisibleRoutes(curRoutes);
   };
@@ -76,7 +74,7 @@ export default function SideBar({ routes }: SideBarProps): JSX.Element {
               <Tooltip key={idx} title={route.title}>
                 <ListItem className="side-bar-item" button {...{ component: Link, to: route.path }}>
                   <ListItemIcon>
-                    <Icon icon={route.icon} />
+                    <Icon icon={route.icon ?? ''} />
                   </ListItemIcon>
                   <ListItemText className={'list-item-txt'} primary={route.title} />
                 </ListItem>

@@ -20,7 +20,7 @@ export default function Modal(props: ModalProps): JSX.Element {
       BackdropComponent={Backdrop}
       BackdropProps={{ timeout: 500 }}
       {...propsToPass}>
-      <Fade in={open}>
+      <Fade in={isOpen}>
         <div className={classes.paper}>
           <div className={classes.title}>
             <h3>{title}</h3>
