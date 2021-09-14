@@ -4,21 +4,10 @@ import dayjs, { Dayjs } from 'dayjs';
 import { MuiPickersUtilsProvider, DateTimePicker } from '@material-ui/pickers';
 import { formatTime } from 'utils/time';
 import { DateInputProps } from 'components/form/Date';
-import { FormChangeEvent } from 'hooks/useFormHasError';
 import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
 
-type DateTimeInputProps = Omit<DateInputProps, 'defaultValue' | 'minDate' | 'maxDate'> & {
-  // fixme: alignment / size 
-  changeHandler: FormChangeEvent;
-  defaultValue: Dayjs;
-  minDate?: Dayjs;
-  maxDate?: Dayjs;
-};
-
-/**
- * fixme: alignment / size
- */
-export default function DateTimeInput(props: DateTimeInputProps): JSX.Element {
+// fixme: alignment / size
+export default function DateTimeInput(props: DateInputProps): JSX.Element {
   const { defaultValue, label, changeHandler, propName, minDate, maxDate, required } = props;
   const [selectedTime, setSelectedTime] = useState<Dayjs | null>(defaultValue?.isValid() ? defaultValue : null);
   const [hasError, setHasError] = useState<boolean>(!!(required && !defaultValue.isValid()));
