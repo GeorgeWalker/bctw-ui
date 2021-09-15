@@ -2,7 +2,7 @@ import { Box } from '@material-ui/core';
 import { FormFromFormfield } from 'components/form/create_form_components';
 import DataLifeInputForm from 'components/form/DataLifeInputForm';
 import useDidMountEffect from 'hooks/useDidMountEffect';
-import { FormChangeEvent } from 'types/form_types';
+import { FormChangeEvent, InboundObj } from 'types/form_types';
 import { FormPart } from 'pages/data//common/EditModalComponents';
 import LocationEventForm from 'pages/data/events/LocationEventForm';
 import { useState } from 'react';
@@ -33,7 +33,7 @@ export default function MortalityEventForm({ event, handleFormChange }: MortEven
   const [requiredDLProps, setReqiredDLProps] = useState<(keyof DataLifeInput)[]>([]);
 
   // workflow logic
-  const onChange = (v: Record<keyof MortalityEvent, unknown>): void => {
+  const onChange = (v: InboundObj): void => {
     handleFormChange(v);
     const key = Object.keys(v)[0] as keyof MortalityEvent;
     const value = Object.values(v)[0];
@@ -57,7 +57,7 @@ export default function MortalityEventForm({ event, handleFormChange }: MortEven
   };
 
   // when the location event form changes, also notify wrapper about errors
-  const onChangeLocationProp = (v: Record<keyof LocationEvent, unknown>): void => {
+  const onChangeLocationProp = (v: InboundObj): void => {
     handleFormChange(v);
   };
 
@@ -77,7 +77,7 @@ export default function MortalityEventForm({ event, handleFormChange }: MortEven
           enableEditStart={false}
           onChange={handleFormChange}
           propsRequired={requiredDLProps}
-          message={<div>{fields.shouldUnattachDevice.long_label}</div>}
+          message={<div>{fields?.shouldUnattachDevice?.long_label}</div>}
         />,
         <Box {...boxProps} pt={2}>
           <span>{fields.mortality_investigation?.long_label}</span>

@@ -19,8 +19,9 @@ export default function LocationEventForm({event, notifyChange }: LocationEventP
 
   // create the form inputs
   const fields = event.fields;
-  const latField = fields.latlon[0];
-  const longField = fields.latlon[1];
+  const latFields = fields.latlon as FormFieldObject<LocationEvent>[];
+  const latField = latFields[0];
+  const longField = latFields[1];
   const utmFields = fields.utm as FormFieldObject<LocationEvent>[];
   const dateField = fields.date as FormFieldObject<LocationEvent>;
   const commentField = fields.comment as FormFieldObject<LocationEvent>;
@@ -35,7 +36,8 @@ export default function LocationEventForm({event, notifyChange }: LocationEventP
   const changeHandler = (v: InboundObj): void => {
     const key = Object.keys(v)[0] as keyof Omit<LocationEvent, 'fields'>;
     const value = Object.values(v)[0];
-    event[key] = value;
+    // fixme: 
+    (event as any)[key] = value;
     // notify parent that the location event changed
     notifyChange(v);
   }

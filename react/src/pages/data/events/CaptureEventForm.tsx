@@ -1,11 +1,11 @@
 import { WorkflowStrings } from 'constants/strings';
 
-type ICaptureWorkflowProps = {
-  open;
-  handleClose;
-  handleSave; 
-  animal_id: string;
-};
+// type ICaptureWorkflowProps = {
+//   isOpen;
+//   handleClose;
+//   handleSave; 
+//   animal_id: string;
+// };
 
 /**
 */

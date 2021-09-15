@@ -60,17 +60,17 @@ export default function AddEditViewer<T extends BCTWBaseType<T>>(props: IAddEdit
   };
 
   const handleClickDelete = (): void => {
-    if (enableDelete()) {
-      const match = editing[editing.identifier ?? 'id'];
-      if (match) {
-        onDelete(match);
+    if (enableDelete() && typeof onDelete === 'function') {
+      const objID = editing[(editing.identifier) as keyof T];
+      if (objID) {
+        onDelete(objID as unknown as string);
       }
     }
   };
 
-  const handleClickSave = (p): void => {
+  const handleClickSave = (p: IUpsertPayload<T>): void => {
     if (typeof onSave === 'function') {
-      onSave(p)
+      onSave(p);
     }
   }
   
@@ -121,7 +121,7 @@ export default function AddEditViewer<T extends BCTWBaseType<T>>(props: IAddEdit
 
         {/* render delete button */}
         {enableDelete() ? (
-          <Button size="large" variant="outlined" color="primary" startIcon={<DeleteOutlineOutlinedIcon />} disabled={cannotEdit || !editing[editing.identifier]} onClick={handleClickDelete}>
+          <Button size="large" variant="outlined" color="primary" startIcon={<DeleteOutlineOutlinedIcon />} disabled={cannotEdit || !editing[editing.identifier as keyof T]} onClick={handleClickDelete}>
             {`Delete ${deleteText ?? ''}`}
           </Button>
         ) : null}

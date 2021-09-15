@@ -1,28 +1,17 @@
-import AssignmentHistory from 'pages/data/animals/AssignmentHistory';
 import Box from '@material-ui/core/Box';
 import Button from 'components/form/Button';
-import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
 import ChangeContext from 'contexts/InputChangeContext';
-import Checkbox from '@material-ui/core/Checkbox';
 import Container from '@material-ui/core/Container';
 import Divider from '@material-ui/core/Divider';
 import EditModal from 'pages/data/common/EditModal';
-import FormControl from '@material-ui/core/FormControl';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Grid from '@material-ui/core/Grid';
-import InputLabel from '@material-ui/core/InputLabel';
 import MalfunctionEventForm from '../events/MalfunctionEventForm';
-import MenuItem from '@material-ui/core/MenuItem';
 import Modal from 'components/modal/Modal';
-import RetrievalEventForm from '../events/RetrievalEventForm';
-import Select from '@material-ui/core/Select';
-import TextField from '@material-ui/core/TextField';
+// import RetrievalEventForm from '../events/RetrievalEventForm';
 import Typography from '@material-ui/core/Typography';
 import { Collar, collarFormFields, eNewCollarType } from 'types/collar';
-import { CollarStrings as CS } from 'constants/strings';
 import { EditorProps } from 'components/component_interfaces';
 import { FormFieldObject } from 'types/form_types';
-import { Icon } from 'components/common';
 import { MakeEditField } from 'components/form/create_form_components';
 import { permissionCanModify } from 'types/permission';
 import { useState } from 'react';
@@ -438,12 +427,13 @@ export default function EditCollar(props: EditorProps<Collar>): JSX.Element {
               { /* retrieval workflow */ }
               {!isCreatingNew && showRetrievalWorkflow ? (
                 <Modal isOpen={showRetrievalWorkflow} handleClose={(): void => setShowRetrievalWorkflow(false)}>
-                  <RetrievalEventForm
+                  <></>
+                  {/* <RetrievalEventForm
                     device_id={editing.device_id}
                     handleClose={(): void => setShowRetrievalWorkflow(false)}
                     handleSave={null}
                     open={showRetrievalWorkflow}
-                  />
+                  /> */}
                 </Modal>
               ) : null}
               { /* malfunction workflow */ }
@@ -452,8 +442,8 @@ export default function EditCollar(props: EditorProps<Collar>): JSX.Element {
                   <MalfunctionEventForm
                     device_id={editing.device_id}
                     handleClose={(): void => setShowMalfunctionWorkflow(false)}
-                    handleSave={null}
-                    open={showMalfunctionWorkflow}
+                    // handleSave={null}
+                    isOpen={showMalfunctionWorkflow}
                   />
                 </Modal>
               ) : null}

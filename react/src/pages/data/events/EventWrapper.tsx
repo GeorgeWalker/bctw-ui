@@ -13,7 +13,8 @@ import { formatAxiosError } from 'utils/errors';
 import { EditHeader } from '../common/EditModalComponents';
 import CaptureEventForm from './CaptureEventForm';
 import MortalityEventForm from './MortalityEventForm';
-import ReleaseEventForm from './ReleaseEventForm';
+// import ReleaseEventForm from './ReleaseEventForm';
+import MortalityEvent from 'types/events/mortality_event';
 
 type EventWrapperProps<T> = ModalBaseProps & {
   event: BCTWEvent<T>;
@@ -69,16 +70,19 @@ export default function EventWrapper<E>({
     switch (event.event_type) {
       case 'mortality':
       default:
-        saveMortality(event);
+        saveMortality(event as unknown as MortalityEvent);
     }
   };
 
+  // update the event object when child form components are changed
   const handleChildFormUpdated = (v: InboundObj): void => {
     checkHasErr(v);
-    const k = Object.keys(v)[0];
+    const k = Object.keys(v)[0] as keyof BCTWEvent<E>;
     // console.log(event[k])
     if (k && k !== 'displayProps') {
-      event[k] = Object.values(v)[0];
+      const value = Object.values(v)[0];
+      // fixme: :(
+      (event as any)[k] = value;
     }
     // console.log(event[k])
   };
@@ -86,7 +90,8 @@ export default function EventWrapper<E>({
   let Comp: React.ReactNode;
   switch (eventType) {
     case 'release':
-      Comp = <ReleaseEventForm />;
+      // Comp = <ReleaseEventForm />;
+      Comp = <></>;
       break;
     case 'capture':
       Comp = <CaptureEventForm />;

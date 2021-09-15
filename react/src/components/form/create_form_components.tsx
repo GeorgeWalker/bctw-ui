@@ -169,11 +169,14 @@ function MakeEditField<T>({
 
 function FormFromFormfield<T extends BCTWEvent<T>>(
   obj: T,
-  formField: FormFieldObject<T>,
+  formField: FormFieldObject<T> | undefined,
   handleChange: FormChangeEvent,
   disabled = false,
   displayBlock = false
 ): React.ReactNode {
+  if (formField === undefined) {
+    return null
+  }
   const { type, prop, required, codeName } = formField;
   const toPass = {
     prop,

@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { Animal } from 'types/animal';
 import { Collar } from 'types/collar';
 import { omitNull } from 'utils/common_helpers';
-import { IHistoryPageProps } from 'pages/data/common/HistoryPage';
+import { HistoryPageProps } from 'pages/data/common/HistoryPage';
 import { EditTabPanel, a11yProps } from 'pages/data/common/EditModalComponents';
 
 import HistoryPage from './HistoryPage';
@@ -25,13 +25,13 @@ import { BCTWBaseType } from 'types/common_types';
 import useFormHasError from 'hooks/useFormHasError';
 
 export type IEditModalProps<T> = EditModalBaseProps<T> & {
-  children: React.ReactNode;
-  hideSave?: boolean;
-  disableTabs?: boolean;
-  disableHistory?: boolean;
+  children         : React.ReactNode;
+  hideSave?        : boolean;
+  disableTabs?     : boolean;
+  disableHistory?  : boolean;
   showInFullScreen?: boolean;
-  onReset?: () => void;
-  headerComponent?: JSX.Element;
+  onReset?         : () => void;
+  headerComponent? : JSX.Element;
 };
 
 /**
@@ -59,20 +59,21 @@ export default function EditModal<T extends BCTWBaseType<T>>(props: IEditModalPr
     onSave,
     onReset,
     headerComponent,
-    disableHistory = false,
-    hideSave = false,
-    disableTabs = false,
+    disableHistory   = false,
+    hideSave         = false,
+    disableTabs      = false,
     showInFullScreen = true
-  } = props;
+  }                  = props;
 
-  const [canSave, setCanSave] = useState<boolean>(false);
-  const [hasErr, checkHasErr] = useFormHasError();
-  const [newObj, setNewObj] = useState<T>(Object.assign({}, editing));
-  const [showHistory, setShowHistory] = useState<boolean>(false);
-  const [historyParams, setHistoryParams] = useState<IHistoryPageProps<T>>();
+  const [canSave, setCanSave]             = useState<boolean>(false);
+  const [hasErr, checkHasErr]             = useFormHasError();
+  const [newObj, setNewObj]               = useState<T>(Object.assign({}, editing));
+  const [showHistory, setShowHistory]     = useState<boolean>(false);
+  const [historyParams, setHistoryParams] = useState<HistoryPageProps<T>>({} as HistoryPageProps<T>);
+  const [value, setValue]                 = React.useState(0);
 
-  const [value, setValue] = React.useState(0);
-  const handleSwitch = (event: React.ChangeEvent<{ 1: number }>, newValue: number): void => {
+    // onChange?: (event: React.ChangeEvent<{}>, value: any) => void;
+  const handleSwitchTab = (event: React.ChangeEvent<{ 1: number }>, newValue: any): void => {
     setValue(newValue);
   };
 
@@ -83,13 +84,13 @@ export default function EditModal<T extends BCTWBaseType<T>>(props: IEditModalPr
         setHistoryParams({
           query: bctwApi.useCritterHistory,
           param: editing.critter_id,
-          propsToDisplay: (editing.displayProps) // show all Animal properties
+          propsToDisplay: editing.displayProps // show all Animal properties
         });
       } else if (editing instanceof Collar) {
         setHistoryParams({
           query: bctwApi.useCollarHistory,
           param: editing.collar_id,
-          propsToDisplay: (editing.displayProps) // show all Device properties
+          propsToDisplay: editing.displayProps // show all Device properties
         });
       }
     };
@@ -140,7 +141,7 @@ export default function EditModal<T extends BCTWBaseType<T>>(props: IEditModalPr
     handleClose(false);
   };
 
-  const modalProps: ModalBaseProps = { isOpen: open, handleClose: onClose, title };
+  const modalProps: Pick<ModalBaseProps, 'isOpen' | 'handleClose' | 'title'> = { isOpen, handleClose: onClose, title };
   const childrenComponents = (
     /**
      * wrap children in the change context provider so they have
@@ -163,7 +164,8 @@ export default function EditModal<T extends BCTWBaseType<T>>(props: IEditModalPr
               <Box mb={4}>
                 <Tabs
                   value={value}
-                  onChange={handleSwitch}
+                  // fixme: poor for react change events :/
+                  onChange={(event: any, value: any): void => handleSwitchTab(event, value as number)}
                   aria-label='simple tabs example'
                   indicatorColor='primary'
                   textColor='primary'>

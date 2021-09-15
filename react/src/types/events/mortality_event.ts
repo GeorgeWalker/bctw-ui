@@ -10,7 +10,7 @@ import { IMortalityAlert } from 'types/alert';
 import { uuid } from 'types/common_types';
 import { Code } from 'types/code';
 import { UserAlertStrings } from 'constants/strings';
-import { CollarHistory, IRemoveDeviceProps } from 'types/collar_history';
+import { CollarHistory, RemoveDeviceInput } from 'types/collar_history';
 import { DataLife, DataLifeInput } from 'types/data_life';
 
 /**
@@ -52,7 +52,7 @@ interface IMortalityEvent
 
 // used to create forms without having to use all event props
 // +? makes the property optional
-type MortalityFormField = {
+export type MortalityFormField = {
   [Property in keyof MortalityEvent]+?: FormFieldObject<MortalityEvent>;
 };
 
@@ -98,7 +98,7 @@ export default class MortalityEvent implements BCTWEvent<MortalityEvent>, IMorta
   location_event: LocationEvent;
   shouldUnattachDevice: boolean;
 
-  // todo: need captivity_status
+  // todo: fetch captivity_status
   constructor() {
     // console.log('im a constructor');
     this.event_type = 'mortality';
@@ -185,6 +185,22 @@ export default class MortalityEvent implements BCTWEvent<MortalityEvent>, IMorta
     device_deployment_status: { prop: 'device_deployment_status', type: eInputType.code },
     device_status: { prop: 'device_status', type: eInputType.code },
     device_condition: { prop: 'device_condition', type: eInputType.code, required: true },
+    // captivity_status: {
+    //   prop: 'captivity_status',
+    //   type: eInputType.check,
+    //   long_label: 'Animal is or has been part of a captivity program'
+    // },
+    // mortality_captivity_status: {
+    //   prop: 'mortality_captivity_status',
+    //   type: eInputType.code,
+    //   codeName: 'mortality_habitat',
+    //   long_label: 'Did the mortality occur when animal was in the wild or in captivity?'
+    // },
+    pcod_confidence: { prop: 'pcod_confidence', type: eInputType.code, codeName: 'cod_confidence' },
+    ucod_confidence: { prop: 'ucod_confidence', type: eInputType.code, codeName: 'cod_confidence' }
+  };
+
+  captivityFields: Required<Pick<MortalityFormField, 'captivity_status' | 'mortality_captivity_status'>> = {
     captivity_status: {
       prop: 'captivity_status',
       type: eInputType.check,
@@ -196,9 +212,7 @@ export default class MortalityEvent implements BCTWEvent<MortalityEvent>, IMorta
       codeName: 'mortality_habitat',
       long_label: 'Did the mortality occur when animal was in the wild or in captivity?'
     },
-    pcod_confidence: { prop: 'pcod_confidence', type: eInputType.code, codeName: 'cod_confidence' },
-    ucod_confidence: { prop: 'ucod_confidence', type: eInputType.code, codeName: 'cod_confidence' }
-  };
+  }
 
   // retrieve the animal metadata fields from the mortality event
   // todo: predator_known, ucod?
@@ -239,13 +253,13 @@ export default class MortalityEvent implements BCTWEvent<MortalityEvent>, IMorta
   }
 
   // when a device is unattached.
-  getAttachment(): IRemoveDeviceProps {
+  getAttachment(): RemoveDeviceInput {
     const { assignment_id, attachment_end, data_life_end } = this;
-    const ret = {
+    const ret: RemoveDeviceInput = {
       assignment_id,
-      //  note: data_life_end must be provided for an attachment end
-      data_life_end: formatT(data_life_end) ?? formatT(attachment_end),
-      attachment_end: formatT(attachment_end)
+      // data_life_end must be provided for an attachment end
+      data_life_end: (formatT(data_life_end) ?? formatT(attachment_end)) as string,
+      attachment_end: formatT(attachment_end ?? dayjs()) as string
     };
     return ret;
   }
