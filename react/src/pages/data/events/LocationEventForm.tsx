@@ -33,7 +33,7 @@ export default function LocationEventForm({event, notifyChange }: LocationEventP
   };
 
   const changeHandler = (v: InboundObj): void => {
-    const key = Object.keys(v)[0];
+    const key = Object.keys(v)[0] as keyof Omit<LocationEvent, 'fields'>;
     const value = Object.values(v)[0];
     event[key] = value;
     // notify parent that the location event changed
@@ -72,12 +72,12 @@ export default function LocationEventForm({event, notifyChange }: LocationEventP
       <Box>
         {showUtm === 'utm' ? (
           utmFields.map((f, idx) => {
-            const numberProps = {key: `loc-num-${idx}`, ...baseInputProps, label: event.formatPropAsHeader(f.prop), propName: f.prop};
+            const numberProps = {validate: (v: number): string => '', key: `loc-num-${idx}`, ...baseInputProps, label: event.formatPropAsHeader(f.prop), propName: f.prop};
             // custom form validation
             if (f.prop === 'utm_easting') {
-              numberProps['validate'] = (v: number): string => mustBeXDigits(v, 6);
+              numberProps.validate = (v: number): string => mustBeXDigits(v, 6);
             } else if (f.prop === 'utm_northing') {
-              numberProps['validate'] = (v: number): string => mustBeXDigits(v, 7);
+              numberProps.validate = (v: number): string => mustBeXDigits(v, 7);
             }
             return f.prop === 'utm_zone' ? (
               <NumberInput {...numberProps} />

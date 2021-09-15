@@ -45,10 +45,10 @@ export default function DataTable<T extends BCTWBaseType<T>>({
 
   const [filter, setFilter] = useState<ITableFilter>({} as ITableFilter);
   const [order, setOrder] = useState<Order>(defaultSort?.order ?? 'asc');
-  const [orderBy, setOrderBy] = useState<keyof T>(defaultSort?.property);
+  const [orderBy, setOrderBy] = useState<keyof T | undefined>(defaultSort?.property);
   const [selected, setSelected] = useState<string[]>(alreadySelected);
   const [page, setPage] = useState<number>(1);
-  const [rowIdentifier, setRowIdentifier] = useState<string>('id');
+  const [rowIdentifier, setRowIdentifier] = useState<keyof BCTWBaseType<T>>('id' as any);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const isPaginate = paginate && !DISABLE_PAGINATION;
   /**
@@ -60,7 +60,7 @@ export default function DataTable<T extends BCTWBaseType<T>>({
 
   // if a row is selected in a different table, unselect all rows in this table
   useDidMountEffect(() => {
-    if (useRowState && data.length) {
+    if (useRowState && data?.length) {
       const found = data.findIndex((p) => p[rowIdentifier] === useRowState);
       if (found === -1) {
         setSelected([]);
@@ -83,25 +83,27 @@ export default function DataTable<T extends BCTWBaseType<T>>({
     // console.log('data changed, successfully fetched: ', isSuccess);
     if (isSuccess) {
       // update the row identifier
-      const first = data && data.length && data[0];
-      if (first && typeof first.identifier === 'string') {
-        setRowIdentifier(first.identifier);
+      if (data?.length) {
+        const first = data[0];
+        if (first?.identifier) {
+          setRowIdentifier(first.identifier as keyof BCTWBaseType<T>);
+        }
       }
       // update the parent handler when new data is fetched
-      if (typeof onNewData === 'function') {
+      if (typeof onNewData === 'function' && data) {
         onNewData(data);
       }
-      const newV = [];
+      const newV: T[] = [];
       // update the values state
       // bug: code page, when new values are found they shouldn't be pushed to existing ones!
-      data.forEach((d) => {
+      data?.forEach((d) => {
         const found = values.find((v) => d[rowIdentifier] === v[rowIdentifier]);
         if (!found) {
           newV.push(d);
         }
       });
       setValues((o) => [...o, ...newV]);
-      setRowsPerPage(o => isPaginate ? o : data.length);
+      setRowsPerPage(o => isPaginate ? o : data && data.length ? data.length : 0);
     }
   }, [data]);
 
@@ -111,10 +113,10 @@ export default function DataTable<T extends BCTWBaseType<T>>({
     setOrderBy(property);
   };
 
-  const handleSelectAll = (event): void => {
-    if (event.target.checked) {
-      const newIds = [...selected, ...data.map((r) => r[rowIdentifier])];
-      setSelected(newIds);
+  const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    if (event.target.checked && data) {
+      const newIds: unknown[] = [...selected, ...data.map((r) => r[rowIdentifier])];
+      setSelected(newIds as string[]);
       if (typeof onSelectMultiple === 'function') {
         onSelectMultiple(values.filter((d) => newIds.includes(d[rowIdentifier])));
       }
@@ -131,7 +133,9 @@ export default function DataTable<T extends BCTWBaseType<T>>({
       setSelected([id]);
       // a row can only be selected from the current pages data set
       const row = data.find((d) => d[rowIdentifier] === id);
-      onSelect(row);
+      if (row) {
+        onSelect(row);
+      }
     }
     // will be null unless parent component wraps RowSelectedProvider
     if (typeof dispatchRowSelected === 'function') {
@@ -144,7 +148,7 @@ export default function DataTable<T extends BCTWBaseType<T>>({
       return;
     }
     const selectedIndex = selected.indexOf(id);
-    let newSelected = [];
+    let newSelected: string[] = [];
     if (selectedIndex === -1) {
       newSelected = newSelected.concat(selected, id);
     } else if (selectedIndex === 0) {
@@ -156,10 +160,11 @@ export default function DataTable<T extends BCTWBaseType<T>>({
     }
     setSelected(newSelected);
     if (alreadySelected.length) {
-      onSelectMultiple(newSelected);
+      onSelectMultiple(newSelected as any); // fixme:
     } else {
       // send T[] not just the identifiers
-      onSelectMultiple(values.filter((d) => newSelected.includes(d[rowIdentifier])));
+      const found = values.filter((d) => newSelected.includes(d[rowIdentifier as any]));
+      onSelectMultiple(found as T[]);
     }
   };
 
@@ -188,8 +193,8 @@ export default function DataTable<T extends BCTWBaseType<T>>({
         {isFetching || isLoading ? (
           <CircularProgress />
         ) : isError ? (
-          <NotificationMessage severity='error' message={formatAxiosError(error)} />
-        ) : isSuccess && data.length === 0 ? (
+          <NotificationMessage severity='error' message={formatAxiosError(error as AxiosError)} />
+        ) : isSuccess && data?.length === 0 ? (
           <strong>No data available</strong>
         ) : (
           <strong>Loading...</strong>
@@ -202,7 +207,7 @@ export default function DataTable<T extends BCTWBaseType<T>>({
     <TableToolbar
       rowCount={values.length}
       numSelected={selected.length}
-      title={title}
+      title={title ?? ''}
       onChangeFilter={handleFilter}
       filterableProperties={headers}
     />
@@ -298,8 +303,8 @@ export default function DataTable<T extends BCTWBaseType<T>>({
          * case the next page will load no new results
         */}
         {!isPaginate || isLoading || isFetching || isError || 
-        (isSuccess && data?.length < rowsPerPage && paginate && page === 1) ? null : (
-            <PaginationActions count={data.length} page={page} rowsPerPage={rowsPerPage} onChangePage={handlePageChange} />
+        (isSuccess && data && data?.length < rowsPerPage && paginate && page === 1) ? null : (
+            <PaginationActions count={data?.length ?? 0} page={page} rowsPerPage={rowsPerPage} onChangePage={handlePageChange} />
           )}
       </>
     </TableContainer>

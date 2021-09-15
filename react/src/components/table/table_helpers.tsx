@@ -4,6 +4,7 @@ import { Order, HeadCell } from 'components/table/table_interfaces';
 import { dateObjectToTimeStr, formatTime } from 'utils/time';
 import { Icon } from 'components/common';
 import { isDayjs } from 'dayjs';
+import { ReactNode } from 'react';
 
 /**
  * converts an object to a list of HeadCells
@@ -66,7 +67,7 @@ function stableSort<T>(array: T[], comparator: (a: T, b: T) => number): T[] {
 
 interface ICellFormat {
   align: 'inherit' | 'left' | 'center' | 'right' | 'justify';
-  value: unknown;
+  value: ReactNode;
 }
 /**
  *
@@ -76,7 +77,7 @@ interface ICellFormat {
  */
 const align: Pick<ICellFormat, 'align'> = {align: 'left'};
 function formatTableCell<T>(obj: T, key: keyof T): ICellFormat {
-  const value: unknown = obj[key];
+  const value: ReactNode = obj[key];
   if (typeof value === 'boolean') {
     return { ...align, value: <Icon icon={value ? 'done' : 'close'} /> };
   }

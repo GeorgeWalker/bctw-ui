@@ -22,7 +22,7 @@ export default function BasicTable<T extends BCTWBaseType<T>>({
 }: BasicTableProps<T>): JSX.Element {
   const [selected, setSelected] = useState<T>();
   const [order, setOrder] = useState<Order>('asc');
-  const [orderBy, setOrderBy] = useState<keyof T>();
+  const [orderBy, setOrderBy] = useState<keyof T>('' as any);
 
   const handleSort = (event: React.MouseEvent<unknown>, property: keyof T): void => {
     const isAsc = orderBy === property && order === 'asc';
@@ -30,7 +30,7 @@ export default function BasicTable<T extends BCTWBaseType<T>>({
     setOrderBy(property);
   };
 
-  const isSelected = (id): boolean => {
+  const isSelected = (id: any): boolean => {
     return selected?.[rowIdentifier] === id;
   };
 
@@ -53,9 +53,9 @@ export default function BasicTable<T extends BCTWBaseType<T>>({
             order={order}
             orderBy={(orderBy as string) ?? ''}
             onRequestSort={handleSort}
-            onSelectAllClick={null}
+            onSelectAllClick={(): void => {/* not implemented */ }}
             rowCount={data?.length ?? 0}
-            customHeaders={undefined}
+            customHeaders={[]}
           />
         )}
         <TableBody>

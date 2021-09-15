@@ -100,7 +100,7 @@ export default function SelectCode(props: ISelectProps): JSX.Element {
    * to avoid value being reset, check the new default is not the same as value
    */
   useDidMountEffect(() => {
-    const match = data.find((d) => d?.description === defaultValue);
+    const match = data?.find((d) => d?.description === defaultValue);
     if (match && match.description !== value) {
       reset();
     }

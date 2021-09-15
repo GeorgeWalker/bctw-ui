@@ -1,7 +1,7 @@
 import { DialogProps } from '@material-ui/core';
 import { AlertProps } from '@material-ui/lab/Alert';
 import { IUpsertPayload } from 'api/api_interfaces';
-import { InboundObj } from 'hooks/useFormHasError';
+import { InboundObj } from 'types/form_types';
 
 /**
  * all modals and dialogs require these props

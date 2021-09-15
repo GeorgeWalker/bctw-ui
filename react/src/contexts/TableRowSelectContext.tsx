@@ -1,7 +1,7 @@
-import React, {useContext, useState, createContext } from 'react';
+import React, {useContext, useState, createContext, SetStateAction } from 'react';
 
-const RowSelectedContext = createContext<string>(null);
-const RowSelectedDispatch = createContext(null);
+const RowSelectedContext = createContext<any>(null);
+const RowSelectedDispatch = createContext<any>(null);
 
 /**
  * on views with multiple tables that dont have multiselect enabled, only want one one row 
@@ -14,7 +14,7 @@ const RowSelectedDispatch = createContext(null);
  */
 const RowSelectedProvider = (props: { children: React.ReactNode }): JSX.Element => {
   const { children } = props;
-  const [state, dispatch] = useState<string>(null);
+  const [state, dispatch] = useState<string>('');
 
   return (
     <RowSelectedContext.Provider value={state}>
@@ -33,7 +33,7 @@ const useTableRowSelectedState = (): string => {
 // dispatch a row change with this hook
 const useTableRowSelectedDispatch = (): ((rowID: string) => null) => {
   const context = useContext(RowSelectedDispatch);
-  return context;
+  return context as any;
 };
 
 export {RowSelectedProvider, useTableRowSelectedState, useTableRowSelectedDispatch };
