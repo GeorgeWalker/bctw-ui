@@ -43,7 +43,7 @@ export default function EditCodeHeader(props: EditorProps<CodeHeaderInput>): JSX
                       changeHandler={onChange}
                       required={true}
                       error={hasError}
-                      helperText={hasError && errors[key]}
+                      helperText={hasError ? errors[key] as string : null}
                     />
                   );
                 })}

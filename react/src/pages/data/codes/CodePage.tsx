@@ -13,6 +13,7 @@ import EditCodeHeader from 'pages/data/codes/EditCodeHeader';
 import { IBulkUploadResults, IUpsertPayload } from 'api/api_interfaces';
 import { useResponseDispatch } from 'contexts/ApiResponseContext';
 import ManageLayout from 'pages/layouts/ManageLayout';
+import { AxiosError } from 'axios';
 
 const CodePage: React.FC = () => {
   const [header, setHeader] = useState('animal_status');
@@ -20,17 +21,17 @@ const CodePage: React.FC = () => {
   const bctwApi = useTelemetryApi();
   const responseDispatch = useResponseDispatch();
 
-  const onSuccess = (data): void => {
+  const onSuccess = (data: IBulkUploadResults<ICodeHeader>): void => {
     if (data.errors.length) {
       responseDispatch({ severity: 'error', message: `${data.errors[0].error}` });
       return;
     }
-    const header = data.results[0];
-    responseDispatch({ severity: 'success', message: `code header ${header.code_header_name} saved` });
+    const h = data.results[0];
+    responseDispatch({ severity: 'success', message: `code header ${h.title} saved` });
     // todo: invalidate code_header query?
   };
 
-  const handleClick = (c: CodeHeader): void => {
+  const handleClick = (c: ICodeHeader): void => {
     // setCodeHeader(c);
     setHeader(c.type);
     setTitle(c.title);
@@ -38,8 +39,11 @@ const CodePage: React.FC = () => {
 
   const { mutateAsync } = bctwApi.useMutateCodeHeader({ onSuccess });
 
-  const handleSave = async (p: IUpsertPayload<CodeHeaderInput>): Promise<IBulkUploadResults<ICodeHeader>> =>
-    await mutateAsync(p.body);
+  const handleSave = async (p: IUpsertPayload<CodeHeaderInput>): Promise<void> => {
+    console.error('type mismatch saving codes/codeheaders!');
+    // bug:
+    // await mutateAsync([p.body]);
+  }
 
   const { isFetching, isLoading, isError, error, data } = bctwApi.useCodeHeaders();
 
@@ -51,10 +55,10 @@ const CodePage: React.FC = () => {
   const editProps = {
     editableProps: CodeFormFields.map((s) => s.prop),
     editing: new CodeHeaderInput(),
-    open: false,
+    isOpen: false,
     onSave: handleSave,
     selectableProps: [],
-    handleClose: null
+    handleClose: (): void => { /* do nothing */}
   };
 
   return (
@@ -63,14 +67,14 @@ const CodePage: React.FC = () => {
         {isFetching || isLoading ? (
           <div>Please wait...</div>
         ) : isError ? (
-          <NotificationMessage severity='error' message={formatAxiosError(error)} />
+          <NotificationMessage severity='error' message={formatAxiosError(error as AxiosError)} />
         ) : (
           <>
             <Typography align='center' variant='h6'>
               <strong>Code Management</strong>
             </Typography>
             <ButtonGroup>
-              {data.map((c: CodeHeader) => {
+              {data?.map((c) => {
                 return (
                   <Button key={c.id} onClick={(): void => handleClick(c)}>
                     {c.title}

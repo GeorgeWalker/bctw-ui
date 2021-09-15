@@ -61,7 +61,10 @@ export default function AddEditViewer<T extends BCTWBaseType<T>>(props: IAddEdit
 
   const handleClickDelete = (): void => {
     if (enableDelete()) {
-      onDelete(editing[editing.identifier ?? 'id']);
+      const match = editing[editing.identifier ?? 'id'];
+      if (match) {
+        onDelete(match);
+      }
     }
   };
 

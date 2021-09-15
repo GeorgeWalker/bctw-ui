@@ -1,8 +1,8 @@
 import { INotificationMessage } from 'components/component_interfaces';
 import { useContext, createContext, useState, useEffect } from 'react';
 
-export const ApiResponseContext = createContext<INotificationMessage>(null);
-export const ApiResponseDispatch = createContext(null);
+export const ApiResponseContext = createContext<INotificationMessage | null>(null);
+export const ApiResponseDispatch = createContext<any>(null);
 
 /**
  * fixme: change the name of this, since it really is just a 
@@ -11,7 +11,7 @@ export const ApiResponseDispatch = createContext(null);
 
 const ResponseProvider = (props: { children: React.ReactNode }): JSX.Element => {
   const { children } = props;
-  const [state, dispatch] = useState<INotificationMessage>(null);
+  const [state, dispatch] = useState<INotificationMessage | null>(null);
 
   const clearNotif = (): void => dispatch(null);
   const notifDisplayTime = 6000;
@@ -41,7 +41,7 @@ const useResponseState = (): INotificationMessage => {
   if (context === undefined) {
     throw new Error('useResponseState must be used within a responseProvider');
   }
-  return context;
+  return context as any;
 };
 
 /**

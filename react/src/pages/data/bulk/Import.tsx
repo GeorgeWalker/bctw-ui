@@ -23,6 +23,7 @@ import { Animal } from 'types/animal';
 import { Collar } from 'types/collar';
 import { HistoricalTelemetry, HistoricalTelemetryInput, isHistoricalTelemetry } from 'types/point_import';
 import { classToPlain, plainToClass } from 'class-transformer';
+import { AxiosError } from 'axios';
 
 enum eImportType {
   animal = 'animal',
@@ -86,7 +87,7 @@ export default function Import<T>(): JSX.Element {
    * while the response may have returned successfully, often the import will have failed
    * in this case @type {IBulkUploadResults} will contain an error array
    */
-  const didImportHaveErrors = (): boolean => isSuccess && data.errors.length > 0;
+  const didImportHaveErrors = (): boolean => isSuccess && !!(data && data?.errors.length > 0);
 
   // setup the import mutation
   const { mutateAsync, isIdle, isLoading, isSuccess, isError, error, data, reset } = bctwApi.useMutateBulkCsv({
@@ -124,8 +125,10 @@ export default function Import<T>(): JSX.Element {
     }
   };
 
-  const handleFileChange = (fieldName: string, files: FileList): void => {
-    save(createFormData(fieldName, files));
+  const handleFileChange = (fieldName: string, files: FileList | null): void => {
+    if (files) {
+      save(createFormData(fieldName, files));
+    }
   };
 
   // call the save mutation with the For
@@ -138,11 +141,16 @@ export default function Import<T>(): JSX.Element {
   };
 
   // renders the result/error table when the API returs result of the import
-  const renderResults = (data: IBulkUploadResults<T>): React.ReactNode => {
+  const renderResults = (data: IBulkUploadResults<T> | undefined): React.ReactNode => {
+    if (!data) {
+      return;
+    }
     const { errors, results } = data;
-    const toShow = [];
+    const toShow: any[] = [];
     const isErrors = !!errors.length;
-    let tableProps;
+    const headers: string[] = [];
+    const rowIdentifier = '';
+    let tableProps = {headers, rowIdentifier};
     if (isErrors) {
       tableProps = { headers: ['rownum', 'error'], rowIdentifier: 'rownum'};
     } else {
@@ -157,7 +165,7 @@ export default function Import<T>(): JSX.Element {
           toShow.push(plainToClass(Collar, r));
         }
       })
-      tableProps = { rowIdentifier: rowID };
+      tableProps = { headers, rowIdentifier: rowID };
     }
     return (
       <>
@@ -169,7 +177,7 @@ export default function Import<T>(): JSX.Element {
             }
           />
         </div>
-        <BasicTable data={isError ? errors : classToPlain(toShow) as T[]} {...tableProps} />
+        <BasicTable data={isError ? errors : classToPlain(toShow) as any[]} {...tableProps} />
       </>
     );
   };
@@ -232,7 +240,7 @@ export default function Import<T>(): JSX.Element {
         {/* import results table */}
         <div style={{ minHeight: '200px', maxWidth: '80%', margin: '10px 0', overflowY: 'auto', overflowX: 'auto'}}>{isSuccess ? renderResults(data) : null}</div>
 
-        {isError ? <NotificationMessage severity='error' message={formatAxiosError(error)} /> : null}
+        {isError ? <NotificationMessage severity='error' message={formatAxiosError(error as AxiosError)} /> : null}
       </div>
     </ManageLayout>
   );

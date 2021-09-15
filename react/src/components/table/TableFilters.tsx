@@ -1,12 +1,10 @@
-import { Box, IconButton, makeStyles, ThemeProvider } from '@material-ui/core';
-import { Theme } from '@material-ui/core/styles/createTheme';
-import MultiSelect, { ISelectMultipleData } from 'components/form/MultiSelect';
+import { Box } from '@material-ui/core';
+import MultiSelect, { SelectMultiple } from 'components/form/MultiSelect';
 import TextField from 'components/form/TextInput';
 import { useMemo, useState } from 'react';
 import { columnToHeader } from 'utils/common_helpers';
-import FilterListIcon from '@material-ui/icons/FilterList';
 import { ITableFilter } from './table_interfaces';
-import { Tooltip } from 'components/common';
+import { InboundObj } from 'types/form_types';
 
 type TextFilterProps = {
   rowCount: number;
@@ -24,11 +22,11 @@ function TextFilter({
   defaultFilter,
   setGlobalFilter,
 }: TextFilterProps): JSX.Element {
-  const [value, setValue] = useState<string>(defaultFilter);
+  const [value, setValue] = useState<string>(defaultFilter ?? '');
   const propName = 'search';
 
-  const handleChange = (v): void => {
-    const value = v[propName];
+  const handleChange = (v: InboundObj): void => {
+    const value = v[propName] as string;
     setValue(value);
     setGlobalFilter(value);
   };
@@ -57,10 +55,10 @@ type TableFilterProps<T> = {
  */
 function TableFilter<T>(props: TableFilterProps<T>): JSX.Element {
   const { filterableProperties, onChangeFilter, rowCount } = props;
-  const [selectedOption, setSelectedOption] = useState<string[]>();
-  const [showFilter, setShowFilter] = useState(true);
+  const [selectedOption, setSelectedOption] = useState<string[]>([]);
+  const [showFilter] = useState(true);
 
-  const handleSelect = (v: ISelectMultipleData[]): void => {
+  const handleSelect = (v: SelectMultiple[]): void => {
     const values = v.map(item => item.value as keyof T);
     setSelectedOption(values as string[]);
   };
@@ -79,11 +77,10 @@ function TableFilter<T>(props: TableFilterProps<T>): JSX.Element {
           id: i,
           value: f,
           displayLabel: columnToHeader(f as string)
-        } as ISelectMultipleData;
+        } as SelectMultiple;
       }),
     []
   );
-
 
   return (
     <>
@@ -93,7 +90,7 @@ function TableFilter<T>(props: TableFilterProps<T>): JSX.Element {
             rowCount={rowCount}
             setGlobalFilter={handleTextChange}
           />
-          <MultiSelect renderValue={(v: string[]): string => `${v.length} selected`} label={'Filter Columns'} data={selectOptions} changeHandler={handleSelect} />
+          <MultiSelect renderValue={(v: unknown): string => `${(v as string[]).length} selected`} label={'Filter Columns'} data={selectOptions} changeHandler={handleSelect} />
         </Box>
       ) : null}
 

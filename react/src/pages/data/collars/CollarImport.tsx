@@ -82,14 +82,18 @@ export default function CollarImport({ isOpen: open, handleClose }: CollarImport
     onError
   });
 
-  const onCsvFile = async (fieldName: string, files: FileList): Promise<void> => {
-    const form = createFormData(fieldName, files);
-    await mutateCsv(form);
+  const onCsvFile = async (fieldName: string, files: FileList | null): Promise<void> => {
+    if (files) {
+      const form = createFormData(fieldName, files);
+      await mutateCsv(form);
+    }
   };
 
-  const onKeyXFiles = async (name: string, files: FileList): Promise<void> => {
-    const form = createFormData('xml', files);
-    mutateKeyx(form);
+  const onKeyXFiles = async (name: string, files: FileList | null): Promise<void> => {
+    if (files) {
+      const form = createFormData('xml', files);
+      mutateKeyx(form);
+    }
   };
 
   const onDownloadTemplate = (): void => {

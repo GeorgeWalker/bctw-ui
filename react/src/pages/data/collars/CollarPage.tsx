@@ -36,9 +36,9 @@ export default function CollarPage(): JSX.Element {
 
   const editProps = {
     editing: new Collar(),
-    open: false,
-    onSave: null,
-    handleClose: null,
+    isOpen: false,
+    onSave: (): void => {},
+    handleClose: (): void => {},
   };
 
   const tableProps: ITableQueryProps<Collar> = { query: bctwApi.useCollarType, /* onNewData */ };

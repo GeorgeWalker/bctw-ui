@@ -1,17 +1,19 @@
 import { IUserUpsertPayload } from 'api/user_api';
+import { AxiosError } from 'axios';
 import useDidMountEffect from 'hooks/useDidMountEffect';
 import { useTelemetryApi } from 'hooks/useTelemetryApi';
 import { useState, createContext, useEffect, useContext } from 'react';
 import { User, IKeyCloakSessionInfo } from 'types/user';
+import { formatAxiosError } from 'utils/errors';
 
 export interface IUserContext {
-  user: User;
+  user: User | null;
   error?: string;
 }
 
 export const UserContext = createContext<IUserContext>({
   user: null,
-  error: null,
+  error: '',
 });
 
 export const UserContextDispatch = createContext(null);
@@ -27,7 +29,7 @@ export const UserContextDispatch = createContext(null);
 export const UserStateContextProvider: React.FC = (props) => {
   const api = useTelemetryApi();
   // instantiate the context
-  const [userContext, setUserContext] = useState<IUserContext>({ user: null, error: null });
+  const [userContext, setUserContext] = useState<IUserContext>({ user: null, error: ''});
   const [session, setSession] = useState<IKeyCloakSessionInfo>();
   const [readyUser, setReadyUser] = useState(false);
   const [readySession, setReadySession] = useState(false);
@@ -40,14 +42,14 @@ export const UserStateContextProvider: React.FC = (props) => {
   const onSuccess = (v: User): void => {
     console.log('UserContext: new user object is', v);
   }
-  const onError = (e): void => {
-    console.log('UserContext: error saving user', e)
+  const onError = (e: AxiosError): void => {
+    console.log('UserContext: error saving user', formatAxiosError(e));
   }
   const { mutateAsync } = api.useMutateUser({onSuccess, onError });
 
   // when the user data is fetched...
   useEffect(() => {
-    if (userStatus === 'success') {
+    if (userStatus === 'success' && userData) {
       setReadyUser(true);
       setUserContext({ user: userData });
     } else {
@@ -114,7 +116,7 @@ export const UserStateContextProvider: React.FC = (props) => {
 
   return (
     <UserContext.Provider value={userContext}>
-      <UserContextDispatch.Provider value={setUserContext}>{props.children}</UserContextDispatch.Provider>
+      <UserContextDispatch.Provider value={setUserContext as any}>{props.children}</UserContextDispatch.Provider>
     </UserContext.Provider>
   );
 };

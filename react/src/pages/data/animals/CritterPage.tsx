@@ -42,7 +42,7 @@ export default function CritterPage(): JSX.Element {
   // props to be passed to the edit modal component
   const editProps = {
     editing: new Animal(),
-    open: false, // overwritten in {AddEditViewer}
+    isOpen: false, // overwritten in {AddEditViewer}
     onSave: (): void => { /* do nothing */ },
     handleClose: (): void => { /* do nothing */ },
   };

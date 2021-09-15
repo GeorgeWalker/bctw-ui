@@ -235,7 +235,7 @@ export const useTelemetryApi = () => {
   /**
    * @returns
    */
-  const useAlert = (): UseQueryResult<MortalityAlert[]> => {
+  const useAlert = (): UseQueryResult<MortalityAlert[], AxiosError> => {
     return useQuery<MortalityAlert[], AxiosError>(['userAlert'], () => userApi.getUserAlerts(), {
       ...defaultQueryOptions
     });
@@ -278,14 +278,14 @@ export const useTelemetryApi = () => {
   /**
    * todo:
   */
-  const useExport = (config: UseMutationOptions<string[], AxiosError, ExportQueryParams>): UseMutationResult<string[]> => {
+  const useExport = (config: UseMutationOptions<string[], AxiosError, ExportQueryParams>): UseMutationResult<string[], AxiosError, ExportQueryParams> => {
     return useMutation<string[], AxiosError, ExportQueryParams>((body) => bulkApi.getExportData(body), config);
   };
 
   /** save a code header */
   const useMutateCodeHeader = (
     config: UseMutationOptions<IBulkUploadResults<ICodeHeader>, AxiosError, ICodeHeader[]>
-  ): UseMutationResult<IBulkUploadResults<ICodeHeader>> =>
+  ): UseMutationResult<IBulkUploadResults<ICodeHeader>, AxiosError, ICodeHeader[]> =>
     useMutation<IBulkUploadResults<ICodeHeader>, AxiosError, ICodeHeader[]>(
       (headers) => codeApi.addCodeHeader(headers),
       config
@@ -294,7 +294,7 @@ export const useTelemetryApi = () => {
   /** upsert a collar */
   const useMutateCollar = (
     config: UseMutationOptions<IBulkUploadResults<Collar>, AxiosError, IUpsertPayload<Collar>>
-  ): UseMutationResult<IBulkUploadResults<Collar>> =>
+  ): UseMutationResult<IBulkUploadResults<Collar>, AxiosError, IUpsertPayload<Collar>> =>
     useMutation<IBulkUploadResults<Collar>, AxiosError, IUpsertPayload<Collar>>(
       (collar) => collarApi.upsertCollar(collar),
       config
@@ -303,7 +303,7 @@ export const useTelemetryApi = () => {
   /** upsert an animal */
   const useMutateCritter = (
     config: UseMutationOptions<IBulkUploadResults<Animal>, AxiosError, IUpsertPayload<Animal>>
-  ): UseMutationResult<IBulkUploadResults<Animal>> =>
+  ): UseMutationResult<IBulkUploadResults<Animal>, AxiosError, IUpsertPayload<Animal>> =>
     useMutation<IBulkUploadResults<Animal>, AxiosError, IUpsertPayload<Animal>>((critter) => critterApi.upsertCritter(critter), config);
 
   /** attaches a device from an animal */
@@ -321,19 +321,19 @@ export const useTelemetryApi = () => {
   /** updates the data life of an animal/device attachment */
   const useMutateEditDataLife = (
     config: UseMutationOptions<CollarHistory, AxiosError, IChangeDataLifeProps>
-  ): UseMutationResult =>
+  ): UseMutationResult<CollarHistory, AxiosError, IChangeDataLifeProps> =>
     useMutation<CollarHistory, AxiosError, IChangeDataLifeProps>((dl) => attachmentApi.updateAttachmentDataLife(dl), config);
 
   /** upload a single .csv file to add or update codes/code headers, critters, or collars */
   const useMutateBulkCsv = <T>(
     config: UseMutationOptions<IBulkUploadResults<T>, AxiosError, FormData>
-  ): UseMutationResult<IBulkUploadResults<T>, AxiosError> =>
+  ): UseMutationResult<IBulkUploadResults<T>, AxiosError, FormData> =>
     useMutation<IBulkUploadResults<T>, AxiosError, FormData>((form) => bulkApi.uploadCsv(form), config);
 
   /** upload one or more .keyx files to create new Vectronic devices */
   const useMutateBulkXml = (
     config: UseMutationOptions<IBulkUploadResults<any>, AxiosError, FormData>
-  ): UseMutationResult<IBulkUploadResults<any>, AxiosError> =>
+  ): UseMutationResult<IBulkUploadResults<any>, AxiosError, FormData> =>
     useMutation<IBulkUploadResults<any>, AxiosError, FormData>((formData) => bulkApi.uploadFiles(formData), config);
 
   /** grant or remove permissions to a user to animals */
@@ -346,31 +346,31 @@ export const useTelemetryApi = () => {
     );
 
   /** delete a critter or device */
-  const useDelete = (config: UseMutationOptions<boolean, AxiosError, IDeleteType>): UseMutationResult<boolean> =>
+  const useDelete = (config: UseMutationOptions<boolean, AxiosError, IDeleteType>): UseMutationResult<boolean, AxiosError, IDeleteType> =>
     useMutation<boolean, AxiosError, IDeleteType>((body) => bulkApi.deleteType(body), config);
 
   /** save user defined animal groups */
-  const useMutateUDF = (config: UseMutationOptions<IUDF[], AxiosError, IUDFInput[]>): UseMutationResult<IUDF[]> =>
+  const useMutateUDF = (config: UseMutationOptions<IUDF[], AxiosError, IUDFInput[]>): UseMutationResult<IUDF[], AxiosError, IUDFInput[]> =>
     useMutation<IUDF[], AxiosError, IUDFInput[]>((body) => userApi.upsertUDF(body), config);
 
   /** expire or snooze a user telemetry alert */
-  const useMutateUserAlert = (config: UseMutationOptions<TelemetryAlert[], AxiosError, TelemetryAlert[]>): UseMutationResult<TelemetryAlert[]> =>
+  const useMutateUserAlert = (config: UseMutationOptions<TelemetryAlert[], AxiosError, TelemetryAlert[]>): UseMutationResult<TelemetryAlert[], AxiosError, TelemetryAlert[]> =>
     useMutation<TelemetryAlert[], AxiosError, TelemetryAlert[]>((body) => userApi.updateAlert(body), config);
   
   /** POST a mortality event form */
-  const useMutateMortalityEvent = (config: UseMutationOptions<true, AxiosError, MortalityEvent>): UseMutationResult<WorkflowAPIResponse> =>
+  const useMutateMortalityEvent = (config: UseMutationOptions<WorkflowAPIResponse, AxiosError, MortalityEvent>): UseMutationResult<WorkflowAPIResponse, AxiosError, MortalityEvent> =>
     useMutation<WorkflowAPIResponse, AxiosError, MortalityEvent>((body) => eventApi.saveMortalityEvent(body), config);
   
   /** add or update a user */
-  const useMutateUser = (config: UseMutationOptions<User, AxiosError, IUserUpsertPayload>): UseMutationResult<User> =>
+  const useMutateUser = (config: UseMutationOptions<User, AxiosError, IUserUpsertPayload>): UseMutationResult<User, AxiosError, IUserUpsertPayload> =>
     useMutation<User, AxiosError, IUserUpsertPayload>((body) => userApi.addUser(body), config);
   
   /** see permission_api doc */ 
-  const useMutateSubmitPermissionRequest = (config: UseMutationOptions<unknown, AxiosError, IPermissionRequestInput>): UseMutationResult<unknown> => 
+  const useMutateSubmitPermissionRequest = (config: UseMutationOptions<unknown, AxiosError, IPermissionRequestInput>): UseMutationResult<unknown, AxiosError, IPermissionRequestInput> => 
     useMutation<unknown, AxiosError, IPermissionRequestInput>((body) => permissionApi.submitPermissionRequest(body), config);
 
   /** see permission_api doc */ 
-  const useMutateTakeActionOnPermissionRequest = (config: UseMutationOptions<IUserCritterAccess, AxiosError, IExecutePermissionRequest>): UseMutationResult<IUserCritterAccess> => 
+  const useMutateTakeActionOnPermissionRequest = (config: UseMutationOptions<IUserCritterAccess, AxiosError, IExecutePermissionRequest>): UseMutationResult<IUserCritterAccess, AxiosError, IExecutePermissionRequest> => 
     useMutation<IUserCritterAccess, AxiosError, IExecutePermissionRequest>((body) => permissionApi.takeActionOnPermissionRequest(body), config);
 
   return {

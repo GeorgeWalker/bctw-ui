@@ -158,12 +158,16 @@ export default function DataTable<T extends BCTWBaseType<T>>({
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
     }
+    // bug: clean this up
     setSelected(newSelected);
     if (alreadySelected.length) {
-      onSelectMultiple(newSelected as any); // fixme:
+      onSelectMultiple(newSelected as any);
     } else {
       // send T[] not just the identifiers
-      const found = values.filter((d) => newSelected.includes(d[rowIdentifier as any]));
+      const found = values.filter((d) => {
+        const match = d[rowIdentifier as keyof T];
+        return newSelected.includes(match as any)
+      });
       onSelectMultiple(found as T[]);
     }
   };
@@ -249,14 +253,14 @@ export default function DataTable<T extends BCTWBaseType<T>>({
           <TableBody>
             {(values && values.length === 0) || isFetching || isLoading || isError
               ? NoData()
-              : stableSort(perPage(), getComparator(order, orderBy)).map(
-                (obj, prop: number) => {
-                  const isRowSelected = isSelected(obj[rowIdentifier]);
+              : stableSort(perPage(), getComparator(order, orderBy as keyof T)).map(
+                (obj: T, prop: number) => {
+                  const isRowSelected = isSelected(obj[rowIdentifier] as string);
                   return (
                     <TableRow
                       hover
                       onClick={(event): void => {
-                        handleClickRow(event, obj[rowIdentifier]);
+                        handleClickRow(event, obj[rowIdentifier] as string);
                       }}
                       role='checkbox'
                       aria-checked={isRowSelected}

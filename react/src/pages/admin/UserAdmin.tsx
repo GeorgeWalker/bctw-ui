@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import DataTable from 'components/table/DataTable';
-import { User } from 'types/user';
+import { eUserRole, User } from 'types/user';
 import { ITableQueryProps } from 'components/table/table_interfaces';
 import AuthLayout from 'pages/layouts/AuthLayout';
 import { Typography } from '@material-ui/core';
@@ -19,7 +19,7 @@ export default function UserAdminPage(): JSX.Element {
 
   const tableProps: ITableQueryProps<User> = { query: bctwApi.useUsers };
 
-  const handleTableRowSelect = (u: User): void => setUserModified(u);
+  const selectUserFromTable = (u: User): void => setUserModified(u);
 
   const onSaveSuccess = () => {
     // todo:
@@ -33,12 +33,14 @@ export default function UserAdminPage(): JSX.Element {
   }
 
   // setup the mutations
-  const { mutateAsync: saveMutation } = bctwApi.useDelete({ onSuccess: onSaveSuccess, onError });
+  const { mutateAsync: saveMutation } = bctwApi.useMutateUser({ onSuccess: onSaveSuccess, onError });
   const { mutateAsync: deleteMutation } = bctwApi.useDelete({ onSuccess: onDeleteSuccess, onError });
 
+  // fixme: todo: add ability to choose role (defaulting to observer!)
   const saveUser = async (u: IUpsertPayload<User>): Promise<void> => {
-    console.log('AdminPage: im saving a user', u);
-    await saveMutation(u.body)
+    const payload = { user: u.body, role: eUserRole.observer }
+    console.log('AdminPage: im saving a user', payload);
+    await saveMutation(payload)
   };
 
   const deleteUser = async (id: string): Promise<void> => {
@@ -56,7 +58,7 @@ export default function UserAdminPage(): JSX.Element {
           headers={['id', 'idir', 'bceid', 'email', 'role_type']}
           title='Users'
           queryProps={tableProps}
-          onSelect={handleTableRowSelect}
+          onSelect={selectUserFromTable}
         />
         <div className={'button-row'}>
           <AddEditViewer<User> editText={'User' }addText={'User'} editing={userModified} empty={new User()} onSave={saveUser} onDelete={deleteUser}>
