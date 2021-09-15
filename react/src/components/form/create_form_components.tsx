@@ -6,10 +6,9 @@ import DateTimeInput from 'components/form/DateTimeInput';
 import CheckBox from 'components/form/Checkbox';
 import React from 'react';
 import { columnToHeader, removeProps } from 'utils/common_helpers';
-import { eInputType, FormFieldObject } from 'types/form_types';
+import { eInputType, FormChangeEvent, FormFieldObject } from 'types/form_types';
 import { BCTWEvent } from 'types/events/event';
 import dayjs, { Dayjs } from 'dayjs';
-import { FormChangeEvent } from 'hooks/useFormHasError';
 
 type CreateInputBaseProps<T> = {
   value: unknown;
@@ -115,7 +114,7 @@ function CreateEditSelectField<T>({
       disabled={disabled}
       key={prop as string}
       codeHeader={codeName ?? (prop as string)}
-      defaultValue={value as string}
+      defaultValue={value as string ?? ''}
       changeHandler={handleChange}
       required={required}
       error={!!errorMessage?.length}
@@ -184,7 +183,8 @@ function FormFromFormfield<T extends BCTWEvent<T>>(
     label: obj.formatPropAsHeader(prop),
     disabled,
     required,
-    codeName
+    codeName,
+    key: `${type}-${prop}`
   };
   let Comp: React.ReactNode;
   if (type === eInputType.check) {
